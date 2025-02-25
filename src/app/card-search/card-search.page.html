@@ -1,0 +1,114 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Yu-Gi-Oh! Card Search</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Home and Card Search Buttons Wrapper -->
+  <ion-row>
+    <ion-col size="6">
+      <ion-button expand="full" (click)="goHome()">Home</ion-button>
+    </ion-col>
+    <ion-col size="6">
+      <ion-button expand="full" (click)="goToDeckEditor()">Go to Deck Editor</ion-button>
+    </ion-col>
+  </ion-row>
+
+  <h2>Yu-Gi-Oh! Card Search</h2>
+
+  <ion-item>
+    <ion-input
+      [(ngModel)]="searchTerm"
+      placeholder="Enter card name..."
+      (keyup.enter)="searchCards()"
+    ></ion-input>
+    <ion-button (click)="searchCards()">Search</ion-button>
+  </ion-item>
+
+  <!-- Filter Options -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Filters</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-input
+          type="number"
+          [(ngModel)]="filters.atk"
+          placeholder="Min ATK"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          type="number"
+          [(ngModel)]="filters.def"
+          placeholder="Min DEF"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          type="number"
+          [(ngModel)]="filters.level"
+          placeholder="Level"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          [(ngModel)]="filters.type"
+          placeholder="Type"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          [(ngModel)]="filters.race"
+          placeholder="Race"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          [(ngModel)]="filters.archetype"
+          placeholder="Archetype"
+        ></ion-input>
+      </ion-item>
+
+      <ion-row>
+        <ion-col size="6">
+          <ion-button expand="full" (click)="applyFilters()">Apply Filters</ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button expand="full" (click)="resetFilters()">Reset</ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-text color="danger" *ngIf="error">
+    <p>{{ error }}</p>
+  </ion-text>
+
+  <ion-spinner *ngIf="loading" name="dots"></ion-spinner>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col *ngFor="let card of filteredCards" size="12" size-md="6" size-lg="4">
+        <ion-card (click)="toggleCardDetails(card)">
+          <img [src]="card.imageUrl" [alt]="card.name" />
+          <ion-card-header>
+            <ion-card-title>{{ card.name }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content *ngIf="card.showDetails">
+            <p><strong>Type:</strong> {{ card.type }}</p>
+            <p><strong>Race:</strong> {{ card.race }}</p>
+            <p *ngIf="card.archetype"><strong>Archetype:</strong> {{ card.archetype }}</p>
+            <p>{{ card.desc }}</p>
+            <p *ngIf="card.atk !== undefined"><strong>ATK:</strong> {{ card.atk }}</p>
+            <p *ngIf="card.def !== undefined"><strong>DEF:</strong> {{ card.def }}</p>
+            <p *ngIf="card.level"><strong>Level:</strong> {{ card.level }}</p>
+            <p *ngIf="card.scale"><strong>Scale:</strong> {{ card.scale }}</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
