@@ -1,0 +1,91 @@
+<ion-content>
+  <div class="deck-editor-container">
+    <!-- Home and Card Search Buttons -->
+    <div class="button-container">
+      <ion-button expand="full" color="primary" (click)="goHome()">Home</ion-button>
+      <ion-button expand="full" color="secondary" (click)="goToCardSearch()">Go to Card Search</ion-button>
+    </div>
+
+    <h1>Deck Editor</h1>
+
+    <!-- Create a New Deck -->
+    <div class="deck-creation">
+      <h2>Create a Deck</h2>
+      <ion-input 
+        [(ngModel)]="newDeckName" 
+        placeholder="Enter deck name..." 
+        clearInput
+        class="deck-input">
+      </ion-input>
+      <ion-button expand="full" color="primary" (click)="createDeck()">Create Deck</ion-button>
+    </div>
+
+    <!-- Select a Deck -->
+    <div *ngIf="decks.length > 0">
+      <h2>Select a Deck</h2>
+      <ion-list>
+        <ion-item *ngFor="let deck of decks" [class.selected]="deck === selectedDeck">
+          <ion-label (click)="selectDeckFromList(deck)">
+            {{ deck.name }}
+          </ion-label>
+          <ion-button fill="outline" color="danger" (click)="deleteDeck(deck)">Delete</ion-button>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Search Cards -->
+    <div *ngIf="selectedDeck">
+      <h2>Search your card</h2>
+      <div class="search-bar">
+        <ion-input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="Search for a card...">
+        </ion-input>
+        <ion-button expand="full" color="primary" (click)="searchCards()">Search</ion-button>
+      </div>
+
+      <div *ngIf="error" class="error-message">{{ error }}</div>
+      <div *ngIf="loading" class="loading">
+        <ion-spinner name="crescent"></ion-spinner> Loading...
+      </div>
+
+      <!-- Deck and All Cards side by side -->
+      <div class="deck-sections">
+        <!-- All Cards -->
+        <div class="all-cards">
+          <h2>All Cards</h2>
+          <div *ngIf="allCards.length === 0 && !loading && !error">
+            No cards available. Use the search bar to find cards.
+          </div>
+          <ion-card *ngFor="let card of allCards">
+            <img [src]="card.imageUrl" alt="{{ card.name }}" />
+            <ion-card-header>
+              <ion-card-title>{{ card.name }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-button expand="full" (click)="addToDeck(card)">Add to Deck</ion-button>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+        <!-- Deck Section -->
+        <div class="deck">
+          <h2>Your Deck</h2>
+          <div *ngIf="selectedDeck.cards.length === 0">
+            Your deck is empty. Add cards from the search section.
+          </div>
+          <ion-card *ngFor="let card of selectedDeck.cards">
+            <img [src]="card.imageUrl" alt="{{ card.name }}" />
+            <ion-card-header>
+              <ion-card-title>{{ card.name }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-button expand="full" color="danger" (click)="removeFromDeck(card)">Remove</ion-button>
+            </ion-card-content>
+          </ion-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

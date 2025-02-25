@@ -19,6 +19,10 @@ const routes: Routes = [
     path: 'card-search',
     loadChildren: () => import('./card-search/card-search.module').then( m => m.CardSearchPageModule)
   },
+  {
+    path: 'deck-editor',
+    loadChildren: () => import('./deck-editor/deck-editor.module').then( m => m.DeckEditorPageModule)
+  },
 ];
 
 @NgModule({

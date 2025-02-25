@@ -1,0 +1,430 @@
+/* === DUEL ARENA FULL SCREEN CONTAINER === */
+.deck-editor-container {
+  width: 100vw; /* Full screen width */
+  height: 100vh; /* Full screen height */
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto; /* Enables vertical scrolling */
+  background: rgba(20, 20, 20, 0.95); /* Darkened overlay for depth */
+  border: 3px solid #FFD700; /* Gold border */
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); /* Glowing golden edges */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* === CARD SECTIONS === */
+.all-cards, .deck {
+  display: flex;
+  flex-wrap: wrap;  
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+  max-height: 500px; /* Increases visibility */
+  overflow-y: auto;
+  border: 2px solid #FFD700; /* Gold border */
+  padding: 15px;
+  border-radius: 8px; 
+  background: rgba(0, 0, 0, 0.8); /* Semi-transparent dark background */
+}
+
+/* === CARD STYLING === */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 2px solid #FFD700;
+  border-radius: 8px;
+  padding: 15px;
+  width: 180px;
+  overflow: hidden;
+  background: rgba(30, 30, 30, 0.95);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  transition: transform 0.3s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  width: 160px;
+  height: auto;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  border: 2px solid #FFD700;
+}
+
+.card h3 {
+  font-size: 20px;
+  color: #FFD700;
+  margin: 5px 0;
+}
+
+/* === CARD BUTTON === */
+.card button {
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  background: linear-gradient(45deg, #8B0000, #FF4500);
+  color: #FFD700;
+  border: 2px solid #FFD700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.card button:hover {
+  background: linear-gradient(45deg, #FF4500, #FFD700);
+  transform: scale(1.1);
+}
+
+/* === ENHANCED SEARCH BAR === */
+.search-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+/* Input field */
+.search-bar input {
+  padding: 12px;
+  width: 350px;
+  font-size: 18px;
+  border: 2px solid #FFD700;
+  border-radius: 8px;
+  outline: none;
+  background: rgba(0, 0, 0, 0.9);
+  color: #FFD700;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.3s ease-in-out;
+  box-shadow: inset 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.search-bar input:focus {
+  border-color: #FF4500;
+  box-shadow: 0 0 15px rgba(255, 69, 0, 0.8);
+}
+
+/* Search Button */
+.search-bar button {
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #FFD700;
+  background: linear-gradient(45deg, #8B0000, #FF4500);
+  border: 3px solid #FFD700;
+  border-radius: 8px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.3s;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+}
+
+.search-bar button:hover {
+  background: linear-gradient(45deg, #FF4500, #FFD700);
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 69, 0, 0.9);
+}
+
+.search-bar button:active {
+  background: linear-gradient(45deg, #FFD700, #FF4500);
+  transform: scale(0.95);
+  box-shadow: 0 0 20px rgba(255, 165, 0, 1);
+}
+
+
+/* === FADE-IN EFFECT === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
+  .card {
+    width: 140px;
+  }
+
+  .card img {
+    width: 120px;
+  }
+}
+
+/* === DECK NAME INPUT & SEARCH BAR (Updated for Consistency) === */
+.deck-creation input,
+.search-bar input {
+    padding: 12px;
+    width: 350px;
+    font-size: 18px;
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    outline: none;
+    background: rgba(30, 30, 30, 0.95);
+    color: #FFD700;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+    box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.7);
+}
+
+.deck-creation input:focus,
+.search-bar input:focus {
+  border-color: #FF4500;
+  box-shadow: 0 0 15px rgba(255, 69, 0, 0.9);
+  transform: scale(1.05);
+}
+
+/* === CREATE DECK & SEARCH BUTTONS === */
+.deck-creation button,
+.search-bar button {
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #FFD700;
+  background: linear-gradient(45deg, #8B0000, #FF4500);
+  border: 3px solid #FFD700;
+  border-radius: 8px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+}
+
+.deck-creation button:hover,
+.search-bar button:hover {
+  background: linear-gradient(45deg, #FF4500, #FFD700);
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 69, 0, 1);
+}
+
+.deck-creation button:active,
+.search-bar button:active {
+  background: linear-gradient(45deg, #FFD700, #FF4500);
+  transform: scale(0.95);
+  box-shadow: 0 0 25px rgba(255, 165, 0, 1);
+}
+
+/* === DECK CREATION SECTION === */
+.deck-creation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  background: rgba(0, 0, 0, 0.8); /* Darkened background for consistency */
+  padding: 15px;
+  border-radius: 12px;
+  border: 2px solid #FFD700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); /* Glowing golden edges */
+  transition: all 0.3s ease-in-out;
+  width: fit-content;
+  margin: auto;
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
+  .deck-creation {
+    flex-direction: column;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .deck-creation input {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .deck-creation button {
+    margin-left: 0;
+    margin-top: 10px;
+    width: 100%;
+  }
+}
+
+/* === SELECT A DECK DROPDOWN === */
+select {
+  padding: 12px;
+  width: 350px;
+  font-size: 18px;
+  border: 2px solid #FFD700;
+  border-radius: 8px;
+  outline: none;
+  background: rgba(30, 30, 30, 0.95);
+  color: #FFD700;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+  box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.7);
+  appearance: none; /* Removes default arrow (for better styling) */
+  cursor: pointer;
+}
+
+/* Hover & Focus Effects */
+select:hover,
+select:focus {
+  border-color: #FF4500;
+  box-shadow: 0 0 15px rgba(255, 69, 0, 0.9);
+  transform: scale(1.05);
+}
+
+/* Dropdown Arrow Styling */
+select::-ms-expand {
+  display: none; /* Hides arrow in IE */
+}
+
+select option {
+  background: rgba(30, 30, 30, 0.95);
+  color: #FFD700;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 8px;
+}
+
+/* === SELECT A DECK SECTION === */
+.deck-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 15px;
+  border-radius: 12px;
+  border: 2px solid #FFD700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  transition: all 0.3s ease-in-out;
+  width: fit-content;
+  margin: auto;
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
+  select {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .deck-selection {
+    width: 100%;
+    padding: 10px;
+  }
+}
+
+.deck {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+  height: 100vh; /* Full screen height */
+  width: 100vw; /* Full screen width */
+  overflow-y: auto;
+  border: 2px solid #FFD700;
+  padding: 15px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+h2,h1{
+  color: white;
+}
+
+/* === DELETE DECK BUTTON === */
+.delete-deck-button {
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #FFD700;
+  background: linear-gradient(45deg, #8B0000, #FF4500);
+  border: 3px solid #FFD700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+  margin-top: 15px;
+  margin-left: 10px;
+}
+
+.delete-deck-button:hover {
+  background: linear-gradient(45deg, #FF4500, #FFD700);
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 69, 0, 1);
+}
+
+.delete-deck-button:active {
+  background: linear-gradient(45deg, #FFD700, #FF4500);
+  transform: scale(0.95);
+  box-shadow: 0 0 25px rgba(255, 165, 0, 1);
+}
+li{
+  color: white;
+  font-weight: bold;
+  font-size:20px;
+}
+
+.card-search-button {
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #FFD700;
+  background: linear-gradient(45deg, #8B0000, #FF4500);
+  border: 2px solid #FFD700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.card-search-button:hover {
+  background: linear-gradient(45deg, #FF4500, #FFD700);
+  transform: scale(1.1);
+}
+
+.card-search-button:active {
+  background: linear-gradient(45deg, #FFD700, #FF4500);
+  transform: scale(0.95);
+}
+
+.home-button {
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #FFD700;
+  background: linear-gradient(45deg, #8B0000, #FF4500);
+  border: 2px solid #FFD700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+  margin-right: 10px;
+}
+
+.home-button:hover {
+  background: linear-gradient(45deg, #FF4500, #FFD700);
+  transform: scale(1.05);
+}
+
+.home-button:active {
+  background: linear-gradient(45deg, #FFD700, #FF4500);
+  transform: scale(0.95);
+}
