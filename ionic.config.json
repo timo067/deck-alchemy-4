@@ -1,0 +1,8 @@
+{
+  "name": "DeckAlchemy4",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular",
+  "id": "de422a12"
+}
