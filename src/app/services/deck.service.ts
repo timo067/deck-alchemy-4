@@ -65,18 +65,23 @@ export class DeckService {
 
   // Update deck by adding or removing cards
   async updateDeck(deck: any, card: any, remove = false): Promise<void> {
-    const deckRef = doc(this.firestore, `decks`, deck.name);  // Reference to the "decks" collection
-
-    if (remove) {
-      // Remove the card from the deck
-      await updateDoc(deckRef, {
-        cards: arrayRemove(card),  // Remove card using arrayRemove
-      });
-    } else {
-      // Add the card to the deck
-      await updateDoc(deckRef, {
-        cards: arrayUnion(card),  // Add card using arrayUnion
-      });
+    const deckRef = doc(this.firestore, 'decks', deck.name);
+  
+    try {
+      if (remove) {
+        // Remove card from the deck
+        await updateDoc(deckRef, {
+          cards: arrayRemove(card),
+        });
+      } else {
+        // Add card to the deck
+        await updateDoc(deckRef, {
+          cards: arrayUnion(card),
+        });
+      }
+    } catch (error) {
+      console.error('Error updating deck:', error);
+      throw new Error('Failed to update deck.');
     }
   }
 }
