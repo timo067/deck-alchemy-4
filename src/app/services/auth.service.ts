@@ -1,40 +1,51 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { initializeApp, getApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { environment } from '../../environments/environment'; // Ensure correct path
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private firestore;
+  private loggedInAccounts: string[] = [];
 
   constructor(private afAuth: AngularFireAuth) {
-    // Ensure Firebase is initialized only once
     if (!getApps().length) {
       initializeApp(environment.firebase);
     }
-
-    this.firestore = getFirestore(getApp()); // Get Firestore instance
+    this.firestore = getFirestore(getApp());
   }
 
-  async register(email: string, password: string) {
-    return this.afAuth.createUserWithEmailAndPassword(email, password);
+  async register(email: string, password: string, username: string) {
+    const result = await this.afAuth.createUserWithEmailAndPassword(email, password);
+    if (result.user) {
+      // Use the passed 'username' directly
+      this.addLoggedInUser(username);
+    }
+    return result;
   }
-
+  
   async login(email: string, password: string) {
-    return this.afAuth.signInWithEmailAndPassword(email, password);
-  }
-
+    const result = await this.afAuth.signInWithEmailAndPassword(email, password);
+    if (result.user) {
+      const username = await this.getUsername();  // Use existing function
+      if (username) {
+        this.addLoggedInUser(username);
+      }
+    }
+    return result;
+  }  
+    
   async logout() {
     return this.afAuth.signOut();
   }
 
   async getUserId(): Promise<string | null> {
-    const user = await this.afAuth.currentUser;  // Get current user
+    const user = await this.afAuth.currentUser;
     if (user) {
-      return user.uid;  // Return the user ID
+      return user.uid;
     } else {
       throw new Error('User not authenticated');
     }
@@ -44,13 +55,12 @@ export class AuthService {
     try {
       const userId = await this.getUserId();
       if (!userId) return null;
-
-      const userDocRef = doc(this.firestore, 'Users', userId);
+  
+      const userDocRef = doc(this.firestore, 'users', userId);
       const userSnap = await getDoc(userDocRef);
-
+  
       if (userSnap.exists()) {
-        const userData = userSnap.data();
-        return userData?.['username'] || null;
+        return userSnap.data()?.['username'] || null;
       } else {
         return null;
       }
@@ -58,5 +68,16 @@ export class AuthService {
       console.error('Error fetching username:', error);
       return null;
     }
+  }
+
+  // Add only the username to the logged-in accounts list
+  addLoggedInUser(username: string): void {
+    if (!this.loggedInAccounts.includes(username)) {
+      this.loggedInAccounts.push(username);
+    }
+  }
+
+  getLoggedInAccounts(): string[] {
+    return this.loggedInAccounts;
   }
 }

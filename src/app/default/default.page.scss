@@ -1,0 +1,101 @@
+/* === FULLSCREEN CONTAINER === */
+ion-content {
+  --background: rgba(20, 20, 20, 0.9); /* Dark semi-transparent */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); /* Golden glow */
+  border: 3px solid #FFD700; /* Gold border */
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* === CARD CONTAINER === */
+ion-card {
+  width: 400px;
+  background: rgba(30, 30, 30, 0.95);
+  border: 3px solid #FFD700;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  color: white;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 25px;
+  margin: auto; /* Ensures centering */
+}
+
+/* === CARD HEADER === */
+ion-card-title {
+  font-size: 24px;
+  color: #FFD700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  text-align: center;
+}
+
+/* === LOGGED-IN ACCOUNTS LIST === */
+ion-list {
+  width: 100%;
+}
+
+ion-item {
+  --background: transparent;
+  --border-color: #FFD700;
+  border-bottom: 2px solid #FFD700;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* === BUTTON STYLING === */
+ion-button {
+  --background: linear-gradient(45deg, #8B0000, #FF4500); /* Dark red to fiery orange */
+  --border-radius: 8px;
+  --border-color: #FFD700;
+  --box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 10px 0;
+  width: 100%;
+}
+
+/* === BUTTON HOVER & ACTIVE STYLES === */
+ion-button:hover {
+  --background: linear-gradient(45deg, #FF4500, #FFD700); /* Fiery effect */
+  transform: scale(1.05);
+}
+
+ion-button:active {
+  --background: linear-gradient(45deg, #FFD700, #FF4500);
+  transform: scale(0.95);
+}
+
+/* === ANIMATION === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* === MOBILE RESPONSIVENESS === */
+@media (max-width: 600px) {
+  ion-card {
+    width: 100%;
+    padding: 15px;
+  }
+
+  ion-button {
+    width: 100%;
+  }
+}

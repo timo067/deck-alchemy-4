@@ -1,11 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { DeckEditorPage } from './deck-editor.page';
+
+import { DefaultPage } from './default.page';
 
 const routes: Routes = [
   {
     path: '',
-    component: DeckEditorPage
+    component: DefaultPage
   }
 ];
 
@@ -13,4 +14,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class DeckEditorPageRoutingModule {}
+export class DefaultPageRoutingModule {}

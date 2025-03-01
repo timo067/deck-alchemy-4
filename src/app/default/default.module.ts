@@ -4,17 +4,17 @@ import { FormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
 
-import { DeckEditorPageRoutingModule } from './deck-editor-routing.module';
+import { DefaultPageRoutingModule } from './default-routing.module';
 
-import { DeckEditorPage } from './deck-editor.page';
+import { DefaultPage } from './default.page';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    DeckEditorPageRoutingModule
+    DefaultPageRoutingModule
   ],
-  declarations: [DeckEditorPage]
+  declarations: [DefaultPage]
 })
-export class DeckEditorPageModule {}
+export class DefaultPageModule {}

@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router'; // Import Router
-import { IonButton, IonInput, IonList, IonItem, IonLabel, IonCard, IonCardContent, IonSpinner, IonCardHeader, IonCardTitle } from '@ionic/angular';  // Import Ionic components
+import { Router } from '@angular/router';
+import { IonButton, IonInput, IonList, IonItem, IonLabel, IonCard, IonCardContent, IonSpinner, IonCardHeader, IonCardTitle } from '@ionic/angular';  
+import { DeckService } from '../services/deck.service';  // Import DeckService
 
 interface Card {
   id: number;
@@ -16,42 +17,54 @@ interface Deck {
 
 @Component({
   selector: 'app-deck-editor',
-  templateUrl: './deck-editor.page.html',  // Updated path to page's HTML
-  styleUrls: ['./deck-editor.page.scss'], // Updated path to page's SCSS
-  standalone: false // Added standalone property
+  templateUrl: './deck-editor.page.html',
+  styleUrls: ['./deck-editor.page.scss'],
+  standalone: false
 })
 export class DeckEditorPage {
-  decks: Deck[] = []; // Now Deck has a proper type
-  selectedDeck: Deck | null = null; // This is either a Deck or null
-  allCards: Card[] = []; // Cards fetched from API
-  searchTerm: string = '';
-  loading: boolean = false;
-  error: string | null = null;
-  errorMessage: string = '';
-  newDeckName: string = '';
+  decks: Deck[] = [];  // List of decks
+  selectedDeck: Deck | null = null;  // Currently selected deck
+  allCards: Card[] = [];  // Cards fetched from API
+  searchTerm: string = '';  // Search term for card search
+  loading: boolean = false;  // Loading state for API request
+  error: string | null = null;  // Error message for card search
+  errorMessage: string = '';  // Error message for adding cards
+  newDeckName: string = '';  // New deck name input
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private deckService: DeckService  // Inject DeckService
+  ) {}
 
-  // Create a new deck
-  createDeck(): void {
+  // Create a new deck and add it to the user's collection
+  async createDeck(): Promise<void> {
     if (!this.newDeckName.trim()) {
       alert('Please enter a deck name.');
       return;
     }
 
-    const newDeck: Deck = { name: this.newDeckName, cards: [] };
-    this.decks.push(newDeck);
-    this.selectedDeck = newDeck;
-    this.newDeckName = '';
+    try {
+      // Call createDeck on DeckService to save the deck to Firestore
+      await this.deckService.createDeck(this.newDeckName);
+      
+      // Add the deck to the local list for UI
+      this.decks.push({ name: this.newDeckName, cards: [] });
+      this.selectedDeck = { name: this.newDeckName, cards: [] };
+      this.newDeckName = '';  // Clear the input
+    } catch (error) {
+      console.error('Error creating deck:', error);
+      alert('Error creating deck.');
+    }
   }
 
-  // Select a deck
+  // Select a deck from the list and display its cards
   selectDeckFromList(deck: Deck): void {
     this.selectedDeck = deck;
     this.allCards = [];  // Reset cards when changing deck
   }
 
-  // Search for cards
+  // Search for cards based on the search term
   searchCards(): void {
     if (!this.selectedDeck) {
       alert('Please select or create a deck first.');
@@ -70,6 +83,7 @@ export class DeckEditorPage {
       this.searchTerm
     )}`;
 
+    // Make the API request to search for cards
     this.http.get<any>(apiUrl).subscribe({
       next: (response) => {
         if (response && response.data) {
@@ -92,7 +106,7 @@ export class DeckEditorPage {
     });
   }
 
-  // Add card to the selected deck
+  // Add card to the selected deck, respecting the 3-card limit
   addToDeck(card: Card): void {
     if (!this.selectedDeck) {
       alert('Please select a deck first.');
@@ -101,50 +115,52 @@ export class DeckEditorPage {
   
     const cardCount = this.selectedDeck.cards.filter((c: Card) => c.id === card.id).length;
   
-    console.log('Selected Deck:', this.selectedDeck);
-    console.log('Card to add:', card);
-    console.log('Current card count in deck:', cardCount);
-  
     if (cardCount < 3) {
       this.selectedDeck.cards.push(card);
-      this.errorMessage = '';
-      console.log('Card added to deck:', card);
+      this.errorMessage = ''; // Clear error message
+  
+      // Update the deck in Firestore
+      this.deckService.updateDeck(this.selectedDeck, card);
     } else {
       this.errorMessage = `You can only add "${card.name}" up to 3 times.`;
-      console.log('Card not added: limit reached');
     }
   }
-
-  // Remove only one instance of the selected card from the deck
+  
   removeFromDeck(card: Card): void {
     if (this.selectedDeck) {
       const index = this.selectedDeck.cards.findIndex((c: Card) => c.id === card.id);
       if (index !== -1) {
-        this.selectedDeck.cards.splice(index, 1); // Remove only the first occurrence
+        this.selectedDeck.cards.splice(index, 1); // Remove first occurrence
+  
+        // Update the deck in Firestore
+        this.deckService.updateDeck(this.selectedDeck, card, true); // True indicates removal
       }
     }
   }
 
-  // Delete deck
-  deleteDeck(deck: Deck): void {
+  // Delete the selected deck from the list
+  async deleteDeck(deck: Deck): Promise<void> {
     const index = this.decks.indexOf(deck);
     if (index !== -1) {
       this.decks.splice(index, 1);
-      
+
       // If the deleted deck was the selected one, clear the selection
       if (this.selectedDeck === deck) {
         this.selectedDeck = null;
         this.allCards = [];
       }
+
+      // Delete the deck from Firestore
+      await this.deckService.deleteDeck(deck.name);
     }
   }
 
-  // Go to home page
+  // Navigate to the home page
   goHome(): void {
     this.router.navigate(['/default']);
   }
 
-  // Go to card search page
+  // Navigate to the card search page
   goToCardSearch(): void {
     this.router.navigate(['/card-search']);
   }

@@ -1,50 +1,60 @@
-// login.page.ts
 import { Component } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
-import { getFirestore, doc, updateDoc, serverTimestamp, collection, getDocs, query, where, addDoc } from 'firebase/firestore';
+import { getFirestore, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
-  standalone:false
+  standalone: false,
 })
 export class LoginPage {
   email: string;
   password: string;
-
-  private firestore = getFirestore(); // Firestore instance
+  private firestore = getFirestore();
+  username: string | undefined;
 
   constructor(private authService: AuthService, private router: Router) {
-    this.email = ''; // Initialize email
-    this.password = ''; // Initialize password
+    this.email = '';
+    this.password = '';
+    this.username = '';
   }
 
   async login() {
+    console.log('Login method triggered');  // Log to check if method is called
+  
     try {
       const userCredential = await this.authService.login(this.email, this.password);
-
+      console.log('User Credential:', userCredential);  // Log the returned userCredential
+  
       if (userCredential.user) {
         const userId = userCredential.user.uid;
-
-        // Update last login and check/reset spendings
+  
+        // Update last login timestamp
         await this.updateLastLogin(userId);
-
-        // Navigate to the home page after login
-        this.router.navigate(['/card-search']);
+  
+        // Fetch and store the username in AuthService
+        const username = await this.authService.getUsername();
+        if (username) {
+          this.authService.addLoggedInUser(username);
+        } else {
+          console.warn('Username not found in Firestore.');
+        }
+  
+        // Navigate to the default page which displays logged-in accounts
+        this.router.navigate(['/default']);
       } else {
         console.error('Login failed: No user returned.');
       }
     } catch (error) {
       console.error('Login failed', error);
-      // Display an error message to the user
     }
   }
 
   private async updateLastLogin(userId: string): Promise<void> {
     try {
-      const userDocRef = doc(this.firestore, 'Users', userId);
+      const userDocRef = doc(this.firestore, 'users', userId);
       await updateDoc(userDocRef, {
         lastLogin: serverTimestamp(),
       });

@@ -23,6 +23,10 @@ const routes: Routes = [
     path: 'deck-editor',
     loadChildren: () => import('./deck-editor/deck-editor.module').then( m => m.DeckEditorPageModule)
   },
+  {
+    path: 'default',
+    loadChildren: () => import('./default/default.module').then( m => m.DefaultPageModule)
+  },
 ];
 
 @NgModule({

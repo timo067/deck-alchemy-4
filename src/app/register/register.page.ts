@@ -1,8 +1,7 @@
-// register.page.ts
 import { Component } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
-import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore'; // Import Firestore functions
+import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 @Component({
   selector: 'app-register',
@@ -11,29 +10,29 @@ import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
   standalone: false,
 })
 export class RegisterPage {
-  email: string;
-  password: string;
+  username: string = ''; // Added username field
+  email: string = ''; 
+  password: string = ''; 
+  private firestore = getFirestore(); 
 
-  private firestore = getFirestore(); // Firestore instance
-
-  constructor(private authService: AuthService, private router: Router) {
-    this.email = ''; // Initialize email
-    this.password = ''; // Initialize password
-  }
+  constructor(private authService: AuthService, private router: Router) {}
 
   async register() {
     try {
-      const userCredential = await this.authService.register(this.email, this.password);
+      if (!this.username.trim()) {
+        console.error('Username is required.');
+        return;
+      }
 
+      const userCredential = await this.authService.register(this.email, this.password, this.username);
       if (userCredential.user) {
         const userId = userCredential.user.uid;
-        const username = this.email.split('@')[0];
-        const email = this.email;
 
-        // Save the user data to Firestore with UID as the document ID
-        await this.saveUserToFirestore(userId, username, email);
+        // Save user data to Firestore
+        await this.saveUserToFirestore(userId, this.username, this.email);
 
-        this.router.navigate(['/login']); // Navigate to login after successful registration
+        // Redirect to login page
+        this.router.navigate(['/login']);
       } else {
         console.error("User registration failed: No user returned.");
       }
@@ -42,15 +41,13 @@ export class RegisterPage {
     }
   }
 
-  // Save user data to Firestore with UID as document ID
   private async saveUserToFirestore(userId: string, username: string, email: string): Promise<void> {
-    const userDocRef = doc(this.firestore, 'Users', userId); // Reference to the specific user document
-
+    const userDocRef = doc(this.firestore, 'users', userId);
     await setDoc(userDocRef, {
       UID: userId,
-      username: username,
-      email: email,
-      lastLogin: serverTimestamp(), // Add last login timestamp
+      username,
+      email,
+      lastLogin: serverTimestamp(),
     });
   }
 }

@@ -1,0 +1,124 @@
+/* === FULLSCREEN CONTAINER === */
+ion-content {
+  --background: rgba(20, 20, 20, 0.9) !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  text-align: center;
+  visibility: visible;
+}
+
+/* === LOGIN CARD === */
+ion-card {
+  width: 400px;
+  background: rgba(30, 30, 30, 0.95);
+  border: 3px solid #FFD700;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  color: white;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 25px;
+  margin: auto; /* Ensures centering */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* === CARD HEADER === */
+ion-card-title {
+  font-size: 24px;
+  color: #FFD700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  text-align: center;
+}
+
+/* === FORM STYLING === */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+  width: 100%;
+}
+
+ion-item {
+  --background: transparent;
+  --border-color: #FFD700;
+  border-bottom: 2px solid #FFD700;
+  width: 100%;
+}
+
+ion-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #FFD700;
+  text-transform: uppercase;
+}
+
+ion-input {
+  --color: #FFD700;
+  --placeholder-color: rgba(255, 215, 0, 0.6);
+  --padding-start: 10px;
+  text-align: left;
+}
+
+/* === ERROR MESSAGE === */
+.error {
+  background: rgba(255, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #FF4500;
+  text-shadow: 0 0 5px rgba(255, 69, 0, 0.7);
+  text-align: center;
+}
+
+/* === BUTTON STYLING === */
+ion-button {
+  --background: linear-gradient(45deg, #8B0000, #FF4500);
+  --border-radius: 8px;
+  --border-color: #FFD700;
+  --box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+ion-button:hover {
+  --background: linear-gradient(45deg, #FF4500, #FFD700);
+  transform: scale(1.05);
+}
+
+ion-button:active {
+  --background: linear-gradient(45deg, #FFD700, #FF4500);
+  transform: scale(0.95);
+}
+
+/* === TOGGLE BETWEEN LOGIN / REGISTER === */
+p {
+  font-size: 14px;
+  color: white;
+  margin-top: 10px;
+  text-align: center;
+}
+
+a {
+  color: #FFD700;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease-in-out;
+}
+
+a:hover {
+  color: #FF4500;
+  text-shadow: 0 0 5px rgba(255, 69, 0, 0.8);
+}
