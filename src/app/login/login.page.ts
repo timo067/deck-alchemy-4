@@ -38,12 +38,11 @@ export class LoginPage {
         const username = await this.authService.getUsername();
         if (username) {
           this.authService.addLoggedInUser(username);
+          this.router.navigate(['/default']);
         } else {
           console.warn('Username not found in Firestore.');
         }
   
-        // Navigate to the default page which displays logged-in accounts
-        this.router.navigate(['/default']);
       } else {
         console.error('Login failed: No user returned.');
       }

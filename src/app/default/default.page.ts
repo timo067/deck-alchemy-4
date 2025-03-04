@@ -1,41 +1,39 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-default',
   templateUrl: './default.page.html',
   styleUrls: ['./default.page.scss'],
-  standalone: false
+  standalone: false,
 })
-export class DefaultPage implements OnInit {   // Implement OnInit
+export class DefaultPage implements OnInit {
   loggedInAccounts: string[] = [];
 
-  constructor(private router: Router, private authService: AuthService, private cdr: ChangeDetectorRef) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
-  ngOnInit(): void {   // Call the function inside ngOnInit
-    this.loadLoggedInAccounts();
-  }
-
-  loadLoggedInAccounts(): void {
+  ngOnInit() {
     this.loggedInAccounts = this.authService.getLoggedInAccounts();
-    this.cdr.detectChanges();  // Ensure view gets updated
   }
 
-  navigateToDeckEditor(): void {
+  navigateToDeckEditor() {
     this.router.navigate(['/deck-editor']);
   }
 
-  navigateToSimilarGame(): void {
+  navigateToSimilarGame() {
     this.router.navigate(['/similar-game']);
   }
 
-  navigateToCardSearch(): void {
+  navigateToCardSearch() {
     this.router.navigate(['/card-search']);
   }
 
-  navigateToLogin(): void {
-    this.router.navigate(['/login']);
+  logout() {
+    this.authService.logout().then(() => {
+      this.router.navigate(['/login']);
+    }).catch(error => {
+      console.error('Logout failed', error);
+    });
   }
 }
