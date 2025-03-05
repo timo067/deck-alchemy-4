@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Yu-Gi-Oh! Duel Simulator</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card (click)="togglePlayerDeck()">
+    <ion-card-header>
+      <ion-card-title>Player Deck</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="floating">Deck Name</ion-label>
+        <ion-input [(ngModel)]="playerDeck.name" placeholder="Enter deck name"></ion-input>
+      </ion-item>
+      <p>Deck: {{ playerDeck?.name }}</p>
+      <ion-list *ngIf="showPlayerDeck">
+        <ion-item *ngFor="let card of playerDeck?.cards">
+          {{ card.name }}
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card (click)="toggleEnemyDeck()">
+    <ion-card-header>
+      <ion-card-title>Enemy Deck</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Selected Deck: {{ selectedEnemyDeck?.name }}</p>
+      <ion-list *ngIf="showEnemyDeck">
+        <ion-item *ngFor="let card of selectedEnemyDeck?.cards">
+          {{ card.name }}
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Coin Flip Result</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{ playerStarts ? 'Player starts first' : 'Enemy starts first' }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Search Cards</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="searchCards()"></ion-searchbar>
+      <ion-list>
+        <ion-item *ngFor="let card of searchResults" (click)="addCardToPlayerDeck(card)">
+          {{ card.name }}
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button expand="full" (click)="savePlayerDeck()">Save Player Deck</ion-button>
+</ion-content>

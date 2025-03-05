@@ -22,7 +22,7 @@ export class DefaultPage implements OnInit {
   }
 
   navigateToSimilarGame() {
-    this.router.navigate(['/similar-game']);
+    this.router.navigate(['/game']);
   }
 
   navigateToCardSearch() {

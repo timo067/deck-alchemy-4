@@ -51,6 +51,11 @@ export class AuthService {
     }
   }
 
+  async getUserEmail(): Promise<string | null> {
+    const user = await this.afAuth.currentUser;
+    return user ? user.email : null;
+  }
+
   async getUsername(): Promise<string | null> {
     try {
       const userId = await this.getUserId();
