@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { DeckService } from '../services/deck.service';  // Import DeckService
@@ -20,7 +20,8 @@ interface Deck {
   styleUrls: ['./deck-editor.page.scss'],
   standalone: false
 })
-export class DeckEditorPage {
+export class DeckEditorPage implements OnInit {
+  playerDeck: any = { name: '', cards: [] };
   decks: Deck[] = [];  // List of decks
   selectedDeck: Deck | null = null;  // Currently selected deck
   allCards: Card[] = [];  // Cards fetched from API
@@ -35,6 +36,34 @@ export class DeckEditorPage {
     private router: Router,
     private deckService: DeckService  // Inject DeckService
   ) {}
+
+  ngOnInit() {
+    this.loadDeck();
+  }
+  
+  async loadDeck() {
+    try {
+      this.playerDeck = await this.deckService.getDeck();
+      this.decks = [this.playerDeck]; // Assuming only one deck for simplicity
+    } catch (error) {
+      console.error('Error loading deck:', error);
+    }
+  }
+
+  async saveDeck() {
+    if (!this.playerDeck.name.trim()) {
+      alert('Please enter a deck name.');
+      return;
+    }
+
+    try {
+      await this.deckService.saveDeck(this.playerDeck);
+      alert('Deck saved successfully!');
+    } catch (error) {
+      console.error('Error saving deck:', error);
+      alert('Failed to save deck.');
+    }
+  }
 
   // Create a new deck
   async createDeck(): Promise<void> {

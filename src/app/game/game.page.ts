@@ -4,6 +4,7 @@ import { PlayerDeckService } from '../services/playerdeck.service';
 import { getFirestore } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { environment } from '../../environments/environment';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-game',
@@ -22,7 +23,7 @@ export class GamePage implements OnInit {
   searchResults: any[] = [];
   private firestore: any;
 
-  constructor(private cardService: CardService, private playerDeckService: PlayerDeckService) {
+  constructor(private cardService: CardService, private playerDeckService: PlayerDeckService, private router: Router) {
     const app = initializeApp(environment.firebase);
     this.firestore = getFirestore(app);
   }
@@ -41,19 +42,22 @@ export class GamePage implements OnInit {
     }
   }
 
-  initializeEnemyDecks() {
-    // Manually defined decks
-    this.enemyDecks = [
-      { name: 'Deck 1', cards: this.generateDeck('Blue-Eyes White Dragon', 'Dark Magician', 'Summoned Skull') },
-      { name: 'Deck 2', cards: this.generateDeck('Red-Eyes Black Dragon', 'Celtic Guardian', 'Gaia The Fierce Knight') },
-      { name: 'Deck 3', cards: this.generateDeck('Kuriboh', 'Mystical Elf', 'Feral Imp') },
-      { name: 'Deck 4', cards: this.generateDeck('Harpie Lady', 'Cyber Harpie Lady', 'Harpie Lady Sisters') },
-      { name: 'Deck 5', cards: this.generateDeck('Jinzo', 'The Fiend Megacyber', 'Buster Blader') },
-      // Add more decks as needed
-    ];
+  async initializeEnemyDecks() {
+    try {
+      const cards = await this.cardService.getCards().toPromise();
+      const normalMonsters = cards.data.filter((card: any) => card.type === 'Normal Monster');
+      this.enemyDecks = [
+        { name: 'Random Deck', cards: this.getRandomCards(normalMonsters, 40) }
+      ];
+      this.selectedEnemyDeck = this.enemyDecks[0];
+    } catch (error) {
+      console.error('Error initializing enemy decks:', error);
+    }
+  }
 
-    // Select a random deck for the enemy
-    this.selectedEnemyDeck = this.enemyDecks[Math.floor(Math.random() * this.enemyDecks.length)];
+  getRandomCards(cards: any[], count: number): any[] {
+    const shuffled = cards.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
   }
 
   generateDeck(...cards: string[]): any[] {
@@ -120,4 +124,11 @@ export class GamePage implements OnInit {
     }
   }
   
+  navigateToDeckEditor() {
+    this.router.navigate(['/deck-editor']);
+  }
+
+  navigateToCardSearch() {
+    this.router.navigate(['/card-search']);
+  }
 }

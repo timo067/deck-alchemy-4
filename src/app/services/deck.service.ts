@@ -1,14 +1,60 @@
 import { Injectable } from '@angular/core';
-import { getFirestore, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import { environment } from '../../environments/environment';  // Import environment configuration
+import { getFirestore, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDoc, collection } from 'firebase/firestore';
 import { AuthService } from './auth.service';  // Import AuthService to get the user ID
 
 @Injectable({
   providedIn: 'root',
 })
 export class DeckService {
-  private firestore = getFirestore();
+  private firestore = getFirestore(initializeApp(environment.firebase));
 
   constructor(private authService: AuthService) {}
+
+// Save player's deck to Firestore
+async saveDeck(deck: any): Promise<void> {
+  try {
+    const userId = await this.authService.getUserId();
+    if (!userId) {
+      throw new Error('User ID is missing. Please log in again.');
+    }
+
+    const deckRef = doc(collection(this.firestore, 'userDecks'), userId);
+    await setDoc(deckRef, {
+      userId: userId,
+      name: deck.name,
+      cards: deck.cards
+    });
+
+    console.log(`Deck "${deck.name}" saved successfully for user: ${userId}`);
+  } catch (error) {
+    console.error('Error saving deck:', error);
+    throw new Error('Failed to save deck.');
+  }
+}
+
+// Fetch player's deck from Firestore
+async getDeck(): Promise<any> {
+  try {
+    const userId = await this.authService.getUserId();
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+
+    const deckRef = doc(this.firestore, 'userDecks', userId);
+    const deckDoc = await getDoc(deckRef);
+
+    if (deckDoc.exists()) {
+      return deckDoc.data();
+    } else {
+      return { name: '', cards: [] };
+    }
+  } catch (error) {
+    console.error('Error fetching deck:', error);
+    throw new Error('Failed to fetch deck.');
+  }
+}
 
   // Create a new deck for the authenticated user
   async createDeck(deckName: string): Promise<void> {
