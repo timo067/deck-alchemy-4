@@ -1,0 +1,35 @@
+.game-board {
+  .monster-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; // Increase spacing between cards
+  }
+
+  .monster-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px; // Increase margin around each card
+    padding: 20px; // Increase padding inside each card
+    border: 1px solid #ccc; // Optional: Add a border around each card
+    border-radius: 5px; // Optional: Add rounded corners to each card
+    background-color: #f9f9f9; // Optional: Add a background color to each card
+    color: black; // Ensure text color is readable
+    width: 150px; // Set a fixed width for each card
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Optional: Add a shadow for better visibility
+  }
+
+  ion-thumbnail {
+    margin-bottom: 10px; // Add spacing below the thumbnail
+  }
+
+  ion-label {
+    margin-bottom: 10px; // Add spacing below the label
+    text-align: center; // Center-align the text
+    word-wrap: break-word; // Ensure long names wrap to the next line
+  }
+
+  ion-button {
+    margin-top: 10px; // Add spacing above the button
+  }
+}

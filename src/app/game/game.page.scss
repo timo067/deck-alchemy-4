@@ -1,0 +1,157 @@
+/* General Styles */
+ion-content {
+  --padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(20, 20, 20, 0.95);
+  color: #FFD700;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Header Styles */
+ion-header {
+  --background: var(--ion-color-primary);
+  color: #FFD700;
+  text-align: center;
+}
+
+ion-toolbar {
+  --background: var(--ion-color-primary);
+}
+
+/* Buttons */
+ion-button {
+  --background: linear-gradient(45deg, #8B0000, #FF4500) !important;
+  --color: #FFD700 !important;
+  --border-radius: 6px;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+ion-button::part(native) {
+  background: linear-gradient(45deg, #8B0000, #FF4500) !important;
+  color: #FFD700 !important;
+  border-radius: 6px;
+}
+
+ion-button:hover {
+  --background: linear-gradient(45deg, #FF4500, #FFD700) !important;
+  --color: #1a1a1a !important;
+  transform: scale(1.05);
+}
+
+/* Search Bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+ion-item {
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+  padding: 10px;
+}
+
+ion-input {
+  color: #FFD700;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Deck & Cards Grid */
+.deck-sections {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.all-cards, .deck {
+  flex: 1;
+  min-width: 300px;
+}
+
+/* Card Styling */
+ion-card {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #FFD700;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  text-align: center;
+}
+
+ion-card img {
+  width: 80px;
+  height: auto;
+  border-radius: 4px;
+  border: 2px solid #FFD700;
+  display: block;
+  margin: 5px auto;
+}
+
+ion-card-header {
+  background: rgba(30, 30, 30, 0.9);
+  border-top: 2px solid #FFD700;
+}
+
+ion-card-title {
+  font-size: 18px;
+  color: #FFD700;
+  text-transform: uppercase;
+}
+
+/* Fade-In Effect */
+/* === DUEL RESULT STYLING === */
+.duel-result {
+  margin-top: 20px;
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  padding: 15px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.85);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+  animation: fadeInScale 0.6s ease-in-out;
+}
+
+/* Win result */
+.duel-result.win {
+  color: #00FF00; /* Bright green for victory */
+  border: 2px solid #00FF00;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+}
+
+/* Loss result */
+.duel-result.loss {
+  color: #FF0000; /* Bright red for defeat */
+  border: 2px solid #FF0000;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+}
+
+/* Draw result */
+.duel-result.draw {
+  color: #FFA500; /* Orange for draw */
+  border: 2px solid #FFA500;
+  text-shadow: 0 0 10px rgba(255, 165, 0, 0.7);
+}
+
+/* Fade-In Scale Animation */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+

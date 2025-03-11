@@ -9,52 +9,63 @@ import { AuthService } from './auth.service';  // Import AuthService to get the 
 })
 export class DeckService {
   private firestore = getFirestore(initializeApp(environment.firebase));
+  private selectedDecks: any[] = [];  // Array to store selected decks
 
   constructor(private authService: AuthService) {}
 
-// Save player's deck to Firestore
-async saveDeck(deck: any): Promise<void> {
-  try {
-    const userId = await this.authService.getUserId();
-    if (!userId) {
-      throw new Error('User ID is missing. Please log in again.');
-    }
-
-    const deckRef = doc(collection(this.firestore, 'userDecks'), userId);
-    await setDoc(deckRef, {
-      userId: userId,
-      name: deck.name,
-      cards: deck.cards
-    });
-
-    console.log(`Deck "${deck.name}" saved successfully for user: ${userId}`);
-  } catch (error) {
-    console.error('Error saving deck:', error);
-    throw new Error('Failed to save deck.');
+  // Method to get selected decks
+  getSelectedDecks() {
+    return this.selectedDecks;
   }
-}
 
-// Fetch player's deck from Firestore
-async getDeck(): Promise<any> {
-  try {
-    const userId = await this.authService.getUserId();
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
-
-    const deckRef = doc(this.firestore, 'userDecks', userId);
-    const deckDoc = await getDoc(deckRef);
-
-    if (deckDoc.exists()) {
-      return deckDoc.data();
-    } else {
-      return { name: '', cards: [] };
-    }
-  } catch (error) {
-    console.error('Error fetching deck:', error);
-    throw new Error('Failed to fetch deck.');
+  // Method to set selected decks
+  setSelectedDecks(decks: any[]) {
+    this.selectedDecks = decks;
   }
-}
+
+  // Save player's deck to Firestore
+  async saveDeck(deck: any): Promise<void> {
+    try {
+      const userId = await this.authService.getUserId();
+      if (!userId) {
+        throw new Error('User ID is missing. Please log in again.');
+      }
+
+      const deckRef = doc(collection(this.firestore, 'userDecks'), userId);
+      await setDoc(deckRef, {
+        userId: userId,
+        name: deck.name,
+        cards: deck.cards
+      });
+
+      console.log(`Deck "${deck.name}" saved successfully for user: ${userId}`);
+    } catch (error) {
+      console.error('Error saving deck:', error);
+      throw new Error('Failed to save deck.');
+    }
+  }
+
+  // Fetch player's deck from Firestore
+  async getDeck(): Promise<any> {
+    try {
+      const userId = await this.authService.getUserId();
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
+      const deckRef = doc(this.firestore, 'userDecks', userId);
+      const deckDoc = await getDoc(deckRef);
+
+      if (deckDoc.exists()) {
+        return deckDoc.data();
+      } else {
+        return { name: '', cards: [] };
+      }
+    } catch (error) {
+      console.error('Error fetching deck:', error);
+      throw new Error('Failed to fetch deck.');
+    }
+  }
 
   // Create a new deck for the authenticated user
   async createDeck(deckName: string): Promise<void> {
@@ -87,8 +98,6 @@ async getDeck(): Promise<any> {
       }
     }
   }
-  
-  
 
   // Delete a deck for the authenticated user
   async deleteDeck(deckName: string): Promise<void> {
@@ -128,6 +137,45 @@ async getDeck(): Promise<any> {
     } catch (error) {
       console.error('Error updating deck:', error);
       throw new Error('Failed to update deck.');
+    }
+  }
+
+  // Fetch player's deck from Firestore
+  async getPlayerDeck(): Promise<any> {
+    try {
+      const userId = await this.authService.getUserId();
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
+      const deckRef = doc(this.firestore, 'userDecks', userId);
+      const deckDoc = await getDoc(deckRef);
+
+      if (deckDoc.exists()) {
+        return deckDoc.data();
+      } else {
+        return { name: '', cards: [] };
+      }
+    } catch (error) {
+      console.error('Error fetching deck:', error);
+      throw new Error('Failed to fetch deck.');
+    }
+  }
+
+  // Fetch opponent's deck from Firestore
+  async getOpponentDeck(): Promise<any> {
+    try {
+      const opponentDeckRef = doc(this.firestore, 'opponentDecks', 'randomOpponentDeck');
+      const deckDoc = await getDoc(opponentDeckRef);
+
+      if (deckDoc.exists()) {
+        return deckDoc.data();
+      } else {
+        return { name: '', cards: [] };
+      }
+    } catch (error) {
+      console.error('Error fetching opponent deck:', error);
+      throw new Error('Failed to fetch opponent deck.');
     }
   }
 }

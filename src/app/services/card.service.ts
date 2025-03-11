@@ -14,4 +14,8 @@ export class CardService {
   getCards(): Observable<any> {
     return this.http.get<any>(this.apiUrl);
   }
+
+  getNormalMonsters(cards: any[]): any[] {
+    return cards.filter(card => card.type === 'Normal Monster');
+  }
 }

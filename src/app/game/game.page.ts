@@ -131,4 +131,24 @@ export class GamePage implements OnInit {
   navigateToCardSearch() {
     this.router.navigate(['/card-search']);
   }
+
+  simulateDuel() {
+    if (!this.selectedEnemyDeck) {
+      alert('Please select an enemy deck.');
+      return;
+    }
+
+    if (this.playerDeck.cards.length < 40) {
+      alert('Player deck must have 40 cards.');
+      return;
+    }
+
+    // Navigate to the GameBoardPage
+    this.router.navigate(['/game-board'], {
+      state: {
+        playerDeck: this.playerDeck,
+        enemyDeck: this.selectedEnemyDeck
+      }
+    });
+  }
 }
