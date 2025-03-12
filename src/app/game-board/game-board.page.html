@@ -17,6 +17,10 @@
       <p>Player Life Points: {{ lifePoints }}</p>
       <p>Opponent Life Points: {{ opponentLifePoints }}</p>
     </div>
+    <div class="turn-indicator">
+      <p>Current Turn: {{ playerTurn ? 'Player' : 'Opponent' }}</p>
+      <p>Phase: {{ phase }}</p>
+    </div>
     <div class="player-hand">
       <h2>Your Hand</h2>
       <div class="monster-cards">
@@ -52,7 +56,15 @@
         </div>
       </div>
     </div>
-    <button (click)="nextPhase()">Next Phase</button>
+    <div>
+      <button (click)="nextPhase()">Next Phase</button>
+    </div>
     <button (click)="resetGame()">Reset Game</button>
   </div>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-title>Footer Information</ion-title>
+  </ion-toolbar>
+</ion-footer>

@@ -96,7 +96,7 @@ export class GameBoardPage implements OnInit {
           console.log('Opponent life points:', this.opponentLifePoints);
           this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedTarget);
         } else {
-          this.lifePoints -= (this.selectedTarget.def - this.selectedCard.atk);
+          this.lifePoints -= (this.selectedTarget.atk - this.selectedCard.atk);
           console.log('Player life points:', this.lifePoints);
           this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
         }
@@ -168,9 +168,13 @@ export class GameBoardPage implements OnInit {
   }
 
   opponentTurn() {
-    // Opponent plays a card if they have any in hand
+    // Opponent draws a card
+    this.drawCard();
+
+    // Opponent plays a random card from their hand if they have any
     if (this.opponentHand.length > 0) {
-      const cardToPlay = this.opponentHand[0];
+      const randomIndex = Math.floor(Math.random() * this.opponentHand.length);
+      const cardToPlay = this.opponentHand[randomIndex];
       this.playCard(cardToPlay);
     }
 
