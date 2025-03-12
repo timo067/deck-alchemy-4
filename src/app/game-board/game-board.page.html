@@ -22,9 +22,9 @@
       <div class="monster-cards">
         <div *ngFor="let card of playerHand" class="monster-card" (click)="selectCard(card)">
           <ion-thumbnail slot="start">
-            <img [src]="card.imageUrl" alt="{{ card.name }}">
+            <img [src]="card?.imageUrl" alt="{{ card?.name }}">
           </ion-thumbnail>
-          <ion-label>{{ card.name }}</ion-label>
+          <ion-label>{{ card?.name }}</ion-label>
           <ion-button (click)="playCard(card)">Play</ion-button>
         </div>
       </div>
@@ -34,36 +34,19 @@
       <div class="monster-cards">
         <div *ngFor="let card of opponentHand" class="monster-card" (click)="selectCard(card)">
           <ion-thumbnail slot="start">
-            <img [src]="card.imageUrl" alt="{{ card.name }}">
+            <img [src]="card?.imageUrl" alt="{{ card?.name }}">
           </ion-thumbnail>
-          <ion-label>{{ card.name }}</ion-label>
+          <ion-label>{{ card?.name }}</ion-label>
         </div>
       </div>
     </div>
-    <div class="player-field" (click)="togglePlayerCards()">
-      <h2>Your Field</h2>
-      <div class="monster-cards" *ngIf="showPlayerCards">
-        <div *ngFor="let card of playerMonsterCards" class="monster-card" (click)="selectCard(card)">
-          <ion-thumbnail slot="start">
-            <img [src]="card.imageUrl" alt="{{ card.name }}">
-          </ion-thumbnail>
-          <ion-label>{{ card.name }}</ion-label>
-          <ion-button (click)="attack()">Attack</ion-button>
-        </div>
-      </div>
-    </div>
-    <div class="opponent-field" (click)="toggleOpponentCards()">
-      <h2>Opponent's Field</h2>
-      <div class="monster-cards" *ngIf="showOpponentCards">
-        <div *ngFor="let card of opponentMonsterCards" class="monster-card" (click)="selectCard(card)">
-          <ion-thumbnail slot="start">
-            <img [src]="card.imageUrl" alt="{{ card.name }}">
-          </ion-thumbnail>
-          <ion-label>{{ card.name }}</ion-label>
-          <ion-button (click)="attack()">Attack</ion-button>
-        </div>
-      </div>
-    </div>
+    <button (click)="nextPhase()">Next Phase</button>
     <button (click)="resetGame()">Reset Game</button>
   </div>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-title>Footer Information</ion-title>
+  </ion-toolbar>
+</ion-footer>
