@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CardService } from '../services/card.service';
 
 @Component({
   selector: 'app-game-board',
@@ -8,38 +9,34 @@ import { ActivatedRoute, Router } from '@angular/router';
   standalone: false
 })
 export class GameBoardPage implements OnInit {
-  playerDeck: any = { name: '', cards: [] };
-  opponentDeck: any = { name: '', cards: [] };
-  playerHand: Array<{ name: string, type: string, imageUrl: string, atk: number, def: number }> = [];
-  opponentHand: Array<{ name: string, type: string, imageUrl: string, atk: number, def: number }> = [];
-  playerMonsterCards: Array<{ name: string, type: string, imageUrl: string, atk: number, def: number }> = [];
-  opponentMonsterCards: Array<{ name: string, type: string, imageUrl: string, atk: number, def: number }> = [];
+  playerDeck: any[] = [];
+  opponentDeck: any[] = [];
+  playerHand: any[] = [];
+  opponentHand: any[] = [];
+  playerMonsterCards: any[] = [];
+  opponentMonsterCards: any[] = [];
   selectedCard: any = null;
   selectedTarget: any = null;
   lifePoints: number = 8000;
   opponentLifePoints: number = 8000;
   duelResult: string = '';
-  showPlayerCards: boolean = false; // Track visibility of player's cards
-  showOpponentCards: boolean = false; // Track visibility of opponent's cards
-  playerTurn: boolean = true; // Track whose turn it is
-  phase: string = 'draw'; // Track the current phase of the turn
+  playerTurn: boolean = true;
+  phase: string = 'draw';
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(private cardService: CardService, private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit() {
-    const state = history.state;
-    this.playerDeck = state.playerDeck || { name: '', cards: [] };
-    this.opponentDeck = state.opponentDeck || { name: '', cards: [] };
+    this.cardService.getCards().subscribe(cards => {
+      this.playerDeck = this.cardService.getNormalMonsters(cards);
+      this.opponentDeck = this.cardService.getNormalMonsters(cards);
 
-    this.playerMonsterCards = this.playerDeck.cards.filter((card: any) => card.type === 'Normal Monster');
-    this.opponentMonsterCards = this.opponentDeck.cards.filter((card: any) => card.type === 'Normal Monster');
-
-    this.drawInitialCards();
+      this.drawInitialCards();
+    });
   }
 
   drawInitialCards() {
-    this.playerHand = this.drawCards(this.playerDeck.cards, 5);
-    this.opponentHand = this.drawCards(this.opponentDeck.cards, 5);
+    this.playerHand = this.drawCards(this.playerDeck, 5);
+    this.opponentHand = this.drawCards(this.opponentDeck, 5);
 
     console.log('Player Hand:', this.playerHand);
     console.log('Opponent Hand:', this.opponentHand);
@@ -52,57 +49,48 @@ export class GameBoardPage implements OnInit {
 
   drawCard() {
     if (this.playerTurn) {
-      const newCard = this.drawCards(this.playerDeck.cards, 1)[0];
+      const newCard = this.drawCards(this.playerDeck, 1)[0];
       this.playerHand.push(newCard);
       console.log('Player draws card:', newCard);
     } else {
-      const newCard = this.drawCards(this.opponentDeck.cards, 1)[0];
+      const newCard = this.drawCards(this.opponentDeck, 1)[0];
       this.opponentHand.push(newCard);
       console.log('Opponent draws card:', newCard);
     }
   }
 
-  togglePlayerCards() {
-    this.showPlayerCards = !this.showPlayerCards;
-  }
-
-  toggleOpponentCards() {
-    this.showOpponentCards = !this.showOpponentCards;
-  }
-
   selectCard(card: any) {
-    if (this.phase === 'battle') {
-      if (this.playerTurn) {
-        this.selectedCard = card;
-        console.log('Selected card for attack:', card);
-      } else {
-        this.selectedTarget = card;
-        console.log('Selected target for attack:', card);
-      }
+    if (this.phase === 'battle' && this.playerTurn) {
+      this.selectedCard = card;
+      console.log('Selected card for attack:', card);
+    }
+  }
+
+  selectTarget(card: any) {
+    if (this.phase === 'battle' && !this.playerTurn) {
+      this.selectedTarget = card;
+      console.log('Selected target for attack:', card);
     }
   }
 
   playCard(card: any) {
     if (this.phase === 'main') {
       if (this.playerTurn) {
-        // Player's turn logic
         console.log('Playing card:', card);
         this.playerMonsterCards.push(card);
         this.playerHand = this.playerHand.filter(c => c !== card);
       } else {
-        // Opponent's turn logic
         console.log('Playing card:', card);
         this.opponentMonsterCards.push(card);
         this.opponentHand = this.opponentHand.filter(c => c !== card);
       }
-      this.selectedCard = null; // Clear the selected card after playing
+      this.selectedCard = null;
     }
   }
 
   attack() {
     if (this.phase === 'battle' && this.selectedCard && this.selectedTarget) {
       if (this.playerTurn) {
-        // Player attacks opponent
         if (this.selectedCard.atk > this.selectedTarget.def) {
           this.opponentLifePoints -= (this.selectedCard.atk - this.selectedTarget.def);
           console.log('Opponent life points:', this.opponentLifePoints);
@@ -113,7 +101,6 @@ export class GameBoardPage implements OnInit {
           this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
         }
       } else {
-        // Opponent attacks player
         if (this.selectedCard.atk > this.selectedTarget.def) {
           this.lifePoints -= (this.selectedCard.atk - this.selectedTarget.def);
           console.log('Player life points:', this.lifePoints);
@@ -162,6 +149,10 @@ export class GameBoardPage implements OnInit {
     this.phase = 'draw';
     this.drawCard();
     console.log('Turn ended. Player turn:', this.playerTurn);
+
+    if (!this.playerTurn) {
+      this.opponentTurn();
+    }
   }
 
   nextPhase() {
@@ -174,5 +165,25 @@ export class GameBoardPage implements OnInit {
       this.endTurn();
     }
     console.log('Phase:', this.phase);
+  }
+
+  opponentTurn() {
+    // Opponent plays a card if they have any in hand
+    if (this.opponentHand.length > 0) {
+      const cardToPlay = this.opponentHand[0];
+      this.playCard(cardToPlay);
+    }
+
+    // Opponent attacks if they have any monster cards on the field
+    if (this.opponentMonsterCards.length > 0 && this.playerMonsterCards.length > 0) {
+      const attackingCard = this.opponentMonsterCards[0];
+      const targetCard = this.playerMonsterCards[0];
+      this.selectedCard = attackingCard;
+      this.selectedTarget = targetCard;
+      this.attack();
+    }
+
+    // End opponent's turn
+    this.endTurn();
   }
 }
