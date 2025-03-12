@@ -17,8 +17,8 @@ export class GameBoardPage implements OnInit {
   opponentMonsterCards: any[] = [];
   selectedCard: any = null;
   selectedTarget: any = null;
-  lifePoints: number = 8000;
-  opponentLifePoints: number = 8000;
+  lifePoints: number = 4000;
+  opponentLifePoints: number = 4000;
   duelResult: string = '';
   playerTurn: boolean = true;
   phase: string = 'draw';
@@ -60,16 +60,16 @@ export class GameBoardPage implements OnInit {
   }
 
   selectCard(card: any) {
-    if (this.phase === 'battle' && this.playerTurn) {
+    if (this.phase === 'battle') {
       this.selectedCard = card;
-      console.log('Selected card for attack:', card);
+      console.log(`⚔️ Attacking Card Selected: ${card.name}`);
     }
   }
-
+  
   selectTarget(card: any) {
-    if (this.phase === 'battle' && !this.playerTurn) {
+    if (this.phase === 'battle') {
       this.selectedTarget = card;
-      console.log('Selected target for attack:', card);
+      console.log(`🎯 Target Selected: ${card.name}`);
     }
   }
 
@@ -89,34 +89,42 @@ export class GameBoardPage implements OnInit {
   }
 
   attack() {
-    if (this.phase === 'battle' && this.selectedCard && this.selectedTarget) {
-      if (this.playerTurn) {
-        if (this.selectedCard.atk > this.selectedTarget.def) {
-          this.opponentLifePoints -= (this.selectedCard.atk - this.selectedTarget.def);
-          console.log('Opponent life points:', this.opponentLifePoints);
-          this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedTarget);
-        } else {
-          this.lifePoints -= (this.selectedTarget.atk - this.selectedCard.atk);
-          console.log('Player life points:', this.lifePoints);
-          this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
-        }
-      } else {
-        if (this.selectedCard.atk > this.selectedTarget.def) {
-          this.lifePoints -= (this.selectedCard.atk - this.selectedTarget.def);
-          console.log('Player life points:', this.lifePoints);
-          this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedTarget);
-        } else {
-          this.opponentLifePoints -= (this.selectedTarget.def - this.selectedCard.atk);
-          console.log('Opponent life points:', this.opponentLifePoints);
-          this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedCard);
-        }
-      }
-      this.checkGameEnd();
-      this.endTurn();
-    } else {
-      console.log('Select both an attacking card and a target card.');
+    if (this.phase !== 'battle') {
+      console.log('Not in battle phase!');
+      return;
     }
-  }
+  
+    if (!this.selectedCard || !this.selectedTarget) {
+      console.log('Select both an attacking card and a target card.');
+      return;
+    }
+  
+    if (this.playerTurn) {
+      if (this.selectedCard.atk > this.selectedTarget.def) {
+        this.opponentLifePoints -= (this.selectedCard.atk - this.selectedTarget.def);
+        console.log('Opponent life points:', this.opponentLifePoints);
+        this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedTarget);
+      } else {
+        this.lifePoints -= (this.selectedTarget.atk - this.selectedCard.atk);
+        console.log('Player life points:', this.lifePoints);
+        this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
+      }
+    } else {
+      if (this.selectedCard.atk > this.selectedTarget.def) {
+        this.lifePoints -= (this.selectedCard.atk - this.selectedTarget.def);
+        console.log('Player life points:', this.lifePoints);
+        this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedTarget);
+      } else {
+        this.opponentLifePoints -= (this.selectedTarget.def - this.selectedCard.atk);
+        console.log('Opponent life points:', this.opponentLifePoints);
+        this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedCard);
+      }
+    }
+  
+    this.selectedCard = null;
+    this.selectedTarget = null;
+    this.checkGameEnd();
+  }  
 
   checkGameEnd() {
     if (this.lifePoints <= 0) {
@@ -170,24 +178,32 @@ export class GameBoardPage implements OnInit {
   opponentTurn() {
     // Opponent draws a card
     this.drawCard();
-
+  
     // Opponent plays a random card from their hand if they have any
     if (this.opponentHand.length > 0) {
       const randomIndex = Math.floor(Math.random() * this.opponentHand.length);
       const cardToPlay = this.opponentHand[randomIndex];
-      this.playCard(cardToPlay);
+      
+      console.log('Opponent plays:', cardToPlay);
+      this.opponentMonsterCards.push(cardToPlay);
+      
+      // Remove card from opponent's hand
+      this.opponentHand = this.opponentHand.filter(c => c !== cardToPlay);
     }
-
-    // Opponent attacks if they have any monster cards on the field
+  
+    // Opponent attacks if they have monsters
     if (this.opponentMonsterCards.length > 0 && this.playerMonsterCards.length > 0) {
-      const attackingCard = this.opponentMonsterCards[0];
-      const targetCard = this.playerMonsterCards[0];
+      const attackingCard = this.opponentMonsterCards[0]; // First monster
+      const targetCard = this.playerMonsterCards[0]; // First player's monster
+      
       this.selectedCard = attackingCard;
       this.selectedTarget = targetCard;
+      
+      console.log('Opponent attacks with:', attackingCard);
       this.attack();
     }
-
+  
     // End opponent's turn
     this.endTurn();
-  }
+  }  
 }

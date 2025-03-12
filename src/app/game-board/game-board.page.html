@@ -13,6 +13,8 @@
 
   <div class="game-board">
     <h1>Yu-Gi-Oh! Game Board</h1>
+
+    <!-- Score and Turn Information -->
     <div class="score">
       <p>Player Life Points: {{ lifePoints }}</p>
       <p>Opponent Life Points: {{ opponentLifePoints }}</p>
@@ -21,10 +23,59 @@
       <p>Current Turn: {{ playerTurn ? 'Player' : 'Opponent' }}</p>
       <p>Phase: {{ phase }}</p>
     </div>
+
+    <!-- Battle Actions -->
+    <div class="battle-actions">
+      <p *ngIf="selectedCard">⚔️ Selected Card: {{ selectedCard.name }}</p>
+      <p *ngIf="selectedTarget">🎯 Target: {{ selectedTarget.name }}</p>
+      <ion-button (click)="attack()" [disabled]="!selectedCard || !selectedTarget">Attack</ion-button>
+    </div>
+    
+    <!-- Opponent's Hand -->
+    <div class="opponent-hand">
+      <h2>Opponent's Hand</h2>
+      <div class="monster-cards">
+        <div *ngFor="let card of opponentHand" class="monster-card">
+          <ion-thumbnail slot="start">
+            <img src="assets/card-back.jpg" alt="Card Back">
+          </ion-thumbnail>
+        </div>
+      </div>
+    </div>
+
+    <!-- Opponent's Field -->
+    <div class="opponent-field">
+      <h2>Opponent's Field</h2>
+      <div class="monster-cards">
+        <div *ngFor="let card of opponentMonsterCards" class="monster-card">
+          <ion-thumbnail slot="start">
+            <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}">
+          </ion-thumbnail>
+          <ion-label>{{ card?.name }}</ion-label>
+          <ion-button (click)="selectTarget(card)">Select Target</ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Player's Field -->
+    <div class="player-field">
+      <h2>Your Field</h2>
+      <div class="monster-cards">
+        <div *ngFor="let card of playerMonsterCards" class="monster-card">
+          <ion-thumbnail slot="start">
+            <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}">
+          </ion-thumbnail>
+          <ion-label>{{ card?.name }}</ion-label>
+          <ion-button (click)="selectCard(card)">Select</ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Player's Hand -->
     <div class="player-hand">
       <h2>Your Hand</h2>
       <div class="monster-cards">
-        <div *ngFor="let card of playerHand" class="monster-card" (click)="selectCard(card)">
+        <div *ngFor="let card of playerHand" class="monster-card">
           <ion-thumbnail slot="start">
             <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}">
           </ion-thumbnail>
@@ -33,33 +84,14 @@
         </div>
       </div>
     </div>
-    <div class="player-field">
-      <h2>Your Field</h2>
-      <div class="monster-cards">
-        <div *ngFor="let card of playerMonsterCards" class="monster-card" (click)="selectCard(card)">
-          <ion-thumbnail slot="start">
-            <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}">
-          </ion-thumbnail>
-          <ion-label>{{ card?.name }}</ion-label>
-          <ion-button (click)="attack()">Attack</ion-button>
-        </div>
+
+    <!-- Game Controls -->
+    <div class="game-controls">
+      <div>
+        <button (click)="nextPhase()">Next Phase</button>
       </div>
+      <button (click)="resetGame()">Reset Game</button>
     </div>
-    <div class="opponent-field">
-      <h2>Opponent's Field</h2>
-      <div class="monster-cards">
-        <div *ngFor="let card of opponentMonsterCards" class="monster-card" (click)="selectTarget(card)">
-          <ion-thumbnail slot="start">
-            <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}">
-          </ion-thumbnail>
-          <ion-label>{{ card?.name }}</ion-label>
-        </div>
-      </div>
-    </div>
-    <div>
-      <button (click)="nextPhase()">Next Phase</button>
-    </div>
-    <button (click)="resetGame()">Reset Game</button>
   </div>
 </ion-content>
 
