@@ -36,7 +36,7 @@ export class GamePage implements OnInit {
 
   async loadPlayerDeck() {
     try {
-      this.playerDeck = await this.playerDeckService.getPlayerDeck();
+      this.playerDeck = await this.playerDeckService.getPlayerDecks();
     } catch (error) {
       console.error('Error loading player deck:', error);
     }
@@ -44,18 +44,24 @@ export class GamePage implements OnInit {
 
   async initializeEnemyDecks() {
     try {
+      // Fetch all cards from the card service
       const cards = await this.cardService.getCards().toPromise();
-      const normalMonsters = cards.data.filter((card: any) => card.type === 'Normal Monster');
+      const normalMonsters = cards.filter((card: any) => card.type === 'Normal Monster');
+  
+      // Create a default random enemy deck
       this.enemyDecks = [
-        { name: 'Random Deck', cards: this.getRandomCards(normalMonsters, 40) }
+        { name: 'Random Enemy Deck', cards: this.getRandomCards(normalMonsters, 40) }
       ];
+  
+      // Automatically select the first deck as the default enemy deck
       this.selectedEnemyDeck = this.enemyDecks[0];
     } catch (error) {
       console.error('Error initializing enemy decks:', error);
     }
   }
-
+  
   getRandomCards(cards: any[], count: number): any[] {
+    // Shuffle the cards and return the first `count` cards
     const shuffled = cards.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   }
@@ -83,13 +89,13 @@ export class GamePage implements OnInit {
   }
 
   searchCards() {
-    if (this.searchTerm.trim() === '') {
+    if (!this.searchTerm || this.searchTerm.trim() === '') {
       this.searchResults = [];
       return;
     }
 
     this.cardService.getCards().subscribe(cards => {
-      this.searchResults = cards.data.filter((card: any) => 
+      this.searchResults = cards.filter((card: any) =>
         card.type === 'Normal Monster' && card.name.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
     });
@@ -123,7 +129,7 @@ export class GamePage implements OnInit {
       alert('Failed to save player deck.');
     }
   }
-  
+
   navigateToDeckEditor() {
     this.router.navigate(['/deck-editor']);
   }

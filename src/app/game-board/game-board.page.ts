@@ -42,7 +42,8 @@ export class GameBoardPage implements OnInit {
     console.log('Opponent Hand:', this.opponentHand);
   }
 
-  drawCards(deck: any[], count: number): any[] {
+  drawCards(
+    deck: any[], count: number): any[] {
     const shuffledDeck = [...deck].sort(() => 0.5 - Math.random());
     return shuffledDeck.slice(0, count);
   }
