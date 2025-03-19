@@ -37,7 +37,7 @@ export class PlayerDeckService {
   }
 
   // Fetch player's deck from Firestore
-  async getPlayerDecks(): Promise<any> {
+  async getPlayerDeck(): Promise<any> {
     try {
       const userId = await this.authService.getUserId();
       if (!userId) {

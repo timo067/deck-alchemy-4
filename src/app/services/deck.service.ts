@@ -16,20 +16,20 @@ export class DeckService {
       if (!deckName.trim()) {
         throw new Error('Deck name cannot be empty.');
       }
-
+  
       const userId = await this.authService.getUserId();
       if (!userId) {
         throw new Error('User ID is missing. Please log in again.');
       }
-
+  
       const deckRef = doc(this.firestore, 'decks', deckName);
-
+  
       await setDoc(deckRef, { 
         userId: userId, 
         name: deckName, 
         cards: []
       });
-
+  
       console.log(`Deck "${deckName}" created successfully for user: ${userId}`);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -41,6 +41,8 @@ export class DeckService {
       }
     }
   }
+  
+  
 
   // Delete a deck for the authenticated user
   async deleteDeck(deckName: string): Promise<void> {
@@ -52,18 +54,12 @@ export class DeckService {
       // Check if deck belongs to the authenticated user before deleting
       if (deckDoc.exists() && deckDoc.data()?.['userId'] === userId) {
         await deleteDoc(deckRef);  // Delete deck from Firestore
-        console.log(`Deck "${deckName}" deleted successfully.`);
       } else {
         throw new Error('Deck does not belong to the authenticated user');
       }
     } catch (error) {
-      if (error instanceof Error) {
-        console.error('Error deleting deck:', error.message);
-        throw new Error('Failed to delete deck. ' + error.message);
-      } else {
-        console.error('Unexpected error deleting deck:', error);
-        throw new Error('Failed to delete deck due to an unknown error.');
-      }
+      console.error('Error deleting deck:', error);
+      throw new Error('Failed to delete deck');
     }
   }  
 
@@ -77,22 +73,15 @@ export class DeckService {
         await updateDoc(deckRef, {
           cards: arrayRemove(card),
         });
-        console.log(`Card removed from deck "${deck.name}".`);
       } else {
         // Add card to the deck
         await updateDoc(deckRef, {
           cards: arrayUnion(card),
         });
-        console.log(`Card added to deck "${deck.name}".`);
       }
     } catch (error) {
-      if (error instanceof Error) {
-        console.error('Error updating deck:', error.message);
-        throw new Error('Failed to update deck. ' + error.message);
-      } else {
-        console.error('Unexpected error updating deck:', error);
-        throw new Error('Failed to update deck due to an unknown error.');
-      }
+      console.error('Error updating deck:', error);
+      throw new Error('Failed to update deck.');
     }
   }
 }

@@ -42,8 +42,7 @@ export class GameBoardPage implements OnInit {
     console.log('Opponent Hand:', this.opponentHand);
   }
 
-  drawCards(
-    deck: any[], count: number): any[] {
+  drawCards(deck: any[], count: number): any[] {
     const shuffledDeck = [...deck].sort(() => 0.5 - Math.random());
     return shuffledDeck.slice(0, count);
   }
@@ -109,7 +108,15 @@ export class GameBoardPage implements OnInit {
         this.lifePoints -= (this.selectedTarget.atk - this.selectedCard.atk);
         console.log('Player life points:', this.lifePoints);
         this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
+
+
+
+
+
+
       }
+
+
     } else {
       if (this.selectedCard.atk > this.selectedTarget.def) {
         this.lifePoints -= (this.selectedCard.atk - this.selectedTarget.def);
