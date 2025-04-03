@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CardService } from '../services/card.service';
 import { PlayerDeckService } from '../services/playerdeck.service';
-import { getFirestore } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
-import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 
 @Component({
@@ -13,24 +10,23 @@ import { Router } from '@angular/router';
   standalone: false
 })
 export class GamePage implements OnInit {
-  enemyDecks: any[] = [];
-  selectedEnemyDeck: any;
   playerDeck: any = { name: '', cards: [] };
-  playerStarts: boolean | null = null;
+  enemyDeck: any = { name: 'Enemy Deck', cards: [] }; // Automatically created enemy deck
+  selectedBackground: string = 'Blue Eyes White Dragon.jpg'; // Default background
   showPlayerDeck: boolean = false;
-  showEnemyDeck: boolean = false;
+  playerStarts: boolean | null = null;
   searchTerm: string = '';
   searchResults: any[] = [];
-  private firestore: any;
 
-  constructor(private cardService: CardService, private playerDeckService: PlayerDeckService, private router: Router) {
-    const app = initializeApp(environment.firebase);
-    this.firestore = getFirestore(app);
-  }
+  constructor(
+    private cardService: CardService,
+    private playerDeckService: PlayerDeckService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    this.initializeEnemyDecks();
     this.loadPlayerDeck();
+    this.initializeEnemyDeck();
     this.coinFlip();
   }
 
@@ -42,16 +38,14 @@ export class GamePage implements OnInit {
     }
   }
 
-  async initializeEnemyDecks() {
+  async initializeEnemyDeck() {
     try {
       const cards = await this.cardService.getCards().toPromise();
       const normalMonsters = cards.data.filter((card: any) => card.type === 'Normal Monster');
-      this.enemyDecks = [
-        { name: 'Random Deck', cards: this.getRandomCards(normalMonsters, 40) }
-      ];
-      this.selectedEnemyDeck = this.enemyDecks[0];
+      this.enemyDeck.cards = this.getRandomCards(normalMonsters, 40); // Fill enemy deck with 40 random cards
+      console.log('Enemy Deck initialized:', this.enemyDeck);
     } catch (error) {
-      console.error('Error initializing enemy decks:', error);
+      console.error('Error initializing enemy deck:', error);
     }
   }
 
@@ -60,26 +54,12 @@ export class GamePage implements OnInit {
     return shuffled.slice(0, count);
   }
 
-  generateDeck(...cards: string[]): any[] {
-    // Generate a deck with 40 cards, repeating the provided cards
-    const deck = [];
-    while (deck.length < 40) {
-      deck.push(...cards);
-    }
-    return deck.slice(0, 40);
-  }
-
-  coinFlip() {
-    // Randomly decide who starts first
-    this.playerStarts = Math.random() < 0.5;
-  }
-
   togglePlayerDeck() {
     this.showPlayerDeck = !this.showPlayerDeck;
   }
 
-  toggleEnemyDeck() {
-    this.showEnemyDeck = !this.showEnemyDeck;
+  coinFlip() {
+    this.playerStarts = Math.random() < 0.5;
   }
 
   searchCards() {
@@ -89,7 +69,7 @@ export class GamePage implements OnInit {
     }
 
     this.cardService.getCards().subscribe(cards => {
-      this.searchResults = cards.data.filter((card: any) => 
+      this.searchResults = cards.data.filter((card: any) =>
         card.type === 'Normal Monster' && card.name.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
     });
@@ -133,22 +113,18 @@ export class GamePage implements OnInit {
   }
 
   simulateDuel() {
-    if (!this.selectedEnemyDeck) {
-      alert('Please select an enemy deck.');
-      return;
-    }
-
     if (this.playerDeck.cards.length < 40) {
       alert('Player deck must have 40 cards.');
       return;
     }
-
+  
     // Navigate to the GameBoardPage
     this.router.navigate(['/game-board'], {
       state: {
         playerDeck: this.playerDeck,
-        enemyDeck: this.selectedEnemyDeck
+        enemyDeck: this.enemyDeck.cards,
+        background: this.selectedBackground // ✅ Pass background
       }
-    });
+    });    
   }
 }

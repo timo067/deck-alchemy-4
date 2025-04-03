@@ -1,10 +1,9 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Yu-Gi-Oh! Game Board</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
+<ion-content 
+  [fullscreen]="true"
+  [style.background-image]="'url(/assets/images/' + background + ')'"
+  [style.background-size]="'cover'"
+  [style.background-position]="'center'"
+  [style.background-repeat]="'no-repeat'">
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Yu-Gi-Oh! Game Board</ion-title>
@@ -30,14 +29,14 @@
       <p *ngIf="selectedTarget">🎯 Target: {{ selectedTarget.name }}</p>
       <ion-button (click)="attack()" [disabled]="!selectedCard || !selectedTarget">Attack</ion-button>
     </div>
-    
+
     <!-- Opponent's Hand -->
     <div class="opponent-hand">
       <h2>Opponent's Hand</h2>
       <div class="monster-cards">
         <div *ngFor="let card of opponentHand" class="monster-card">
           <ion-thumbnail slot="start">
-            <img src="assets/card-back.jpg" alt="Card Back">
+            <img src="assets/images/sleeves.jpg" alt="Card Back">
           </ion-thumbnail>
         </div>
       </div>
@@ -95,9 +94,3 @@
 
   </div>
 </ion-content>
-
-<ion-footer>
-  <ion-toolbar>
-    <ion-title>Footer Information</ion-title>
-  </ion-toolbar>
-</ion-footer>

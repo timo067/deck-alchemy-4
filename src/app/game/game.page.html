@@ -26,42 +26,15 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-card (click)="toggleEnemyDeck()">
-    <ion-card-header>
-      <ion-card-title>Enemy Deck</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p>Selected Deck: {{ selectedEnemyDeck?.name }}</p>
-      <ion-list *ngIf="showEnemyDeck">
-        <ion-item *ngFor="let card of selectedEnemyDeck?.cards">
-          {{ card.name }}
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Coin Flip Result</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p>{{ playerStarts ? 'Player starts first' : 'Enemy starts first' }}</p>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Search Cards</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="searchCards()"></ion-searchbar>
-      <ion-list>
-        <ion-item *ngFor="let card of searchResults" (click)="addCardToPlayerDeck(card)">
-          {{ card.name }}
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
+  <div class="background-selection">
+    <h3>Select Background</h3>
+    <ion-select [(ngModel)]="selectedBackground" placeholder="Choose a background">
+      <ion-select-option value="Blue Eyes White Dragon.jpg">Blue Eyes White Dragon</ion-select-option>
+      <ion-select-option value="Magicians.jpg">Magicians</ion-select-option>
+      <ion-select-option value="shaddoll.webp">Shaddoll</ion-select-option>
+      <ion-select-option value="Sky Striker.webp">Sky Striker</ion-select-option>
+    </ion-select>
+  </div>
 
   <ion-button expand="full" (click)="savePlayerDeck()">Save Player Deck</ion-button>
   <ion-button expand="full" (click)="simulateDuel()">Simulate Duel</ion-button>
