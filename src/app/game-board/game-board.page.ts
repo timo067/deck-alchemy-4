@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CardService } from '../services/card.service';
+import { CardService } from '../services/card.service';  // Assuming you have a service for fetching cards
 
 @Component({
   selector: 'app-game-board',
@@ -9,212 +8,84 @@ import { CardService } from '../services/card.service';
   standalone: false
 })
 export class GameBoardPage implements OnInit {
-  playerDeck: any[] = [];
-  opponentDeck: any[] = [];
+  // Add default background image
+  background: string = 'Blue Eyes White Dragon.jpg';  // Default background image
+
+  // Game-related properties
+  lifePoints: number = 4000;
+  opponentLifePoints: number = 4000;
+  playerTurn: boolean = true;
+  phase: string = 'draw';
+  selectedCard: any = null;
+  selectedTarget: any = null;
+
   playerHand: any[] = [];
   opponentHand: any[] = [];
   playerMonsterCards: any[] = [];
   opponentMonsterCards: any[] = [];
-  selectedCard: any = null;
-  selectedTarget: any = null;
-  lifePoints: number = 4000;
-  opponentLifePoints: number = 4000;
-  duelResult: string = '';
-  playerTurn: boolean = true;
-  phase: string = 'draw';
-  background: string = 'assets/images/Blue Eyes White Dragon.jpg'; // Default background image
-  
-  constructor(
-    private cardService: CardService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
-  
+
+  constructor(private cardService: CardService) {}
+
   ngOnInit() {
-    // Get navigation state
-    const state = this.router.getCurrentNavigation()?.extras.state as { background?: string };
-    this.background = state?.background ? `assets/images/${state.background}` : 'assets/images/Blue Eyes White Dragon.jpg';
-  
-    console.log("Selected Background:", this.background);
-  
-    // Fetch Cards & Initialize Decks
+    // Initialize the game, fetch cards, etc.
     this.cardService.getCards().subscribe(cards => {
-      this.playerDeck = this.cardService.getNormalMonsters(cards);
-      this.opponentDeck = this.cardService.getNormalMonsters(cards);
-      this.drawInitialCards();
+      this.playerHand = this.drawCards(cards, 5);
+      this.opponentHand = this.drawCards(cards, 5);
     });
   }
-  
-  drawInitialCards() {
-    this.playerHand = this.drawCards(this.playerDeck, 5);
-    this.opponentHand = this.drawCards(this.opponentDeck, 5);
 
-    console.log('Player Hand:', this.playerHand);
-    console.log('Opponent Hand:', this.opponentHand);
+  // Function to change background
+  changeBackground(backgroundImage: string) {
+    this.background = backgroundImage;  // Update background image
   }
 
+  // Function to draw cards (customize this based on your actual card logic)
   drawCards(deck: any[], count: number): any[] {
-    const shuffledDeck = [...deck].sort(() => 0.5 - Math.random());
-    return shuffledDeck.slice(0, count);
+    return deck.slice(0, count);  // Simple example, adjust as needed
   }
 
-  drawCard() {
-    if (this.playerTurn) {
-      const newCard = this.drawCards(this.playerDeck, 1)[0];
-      this.playerHand.push(newCard);
-      console.log('Player draws card:', newCard);
-    } else {
-      const newCard = this.drawCards(this.opponentDeck, 1)[0];
-      this.opponentHand.push(newCard);
-      console.log('Opponent draws card:', newCard);
-    }
-  }
-
-  selectCard(card: any) {
-    if (this.phase === 'battle') {
-      this.selectedCard = card;
-      console.log(`⚔️ Attacking Card Selected: ${card.name}`);
-    }
-  }
-
-  selectTarget(card: any) {
-    if (this.phase === 'battle') {
-      this.selectedTarget = card;
-      console.log(`🎯 Target Selected: ${card.name}`);
-    }
-  }
-
-  playCard(card: any) {
-    if (this.phase === 'main') {
-      if (this.playerTurn) {
-        console.log('Playing card:', card);
-        this.playerMonsterCards.push(card);
-        this.playerHand = this.playerHand.filter(c => c !== card);
-      } else {
-        console.log('Playing card:', card);
-        this.opponentMonsterCards.push(card);
-        this.opponentHand = this.opponentHand.filter(c => c !== card);
-      }
-      this.selectedCard = null;
-    }
-  }
-
+  // Attack function (Placeholder logic)
   attack() {
-    if (this.phase !== 'battle') {
-      console.log('Not in battle phase!');
-      return;
+    if (this.selectedCard && this.selectedTarget) {
+      // Example attack logic
+      console.log(`Attacking ${this.selectedTarget.name} with ${this.selectedCard.name}`);
+      this.selectedCard = null;  // Clear selected card after attack
+      this.selectedTarget = null;  // Clear selected target after attack
     }
+  }
 
-    if (!this.selectedCard || !this.selectedTarget) {
-      console.log('Select both an attacking card and a target card.');
-      return;
-    }
+  // Select a card from the player's field
+  selectCard(card: any) {
+    this.selectedCard = card;
+  }
 
-    if (this.playerTurn) {
-      if (this.selectedCard.atk > this.selectedTarget.def) {
-        this.opponentLifePoints -= this.selectedCard.atk - this.selectedTarget.def;
-        console.log('Opponent life points:', this.opponentLifePoints);
-        this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedTarget);
-      } else {
-        this.lifePoints -= this.selectedTarget.atk - this.selectedCard.atk;
-        console.log('Player life points:', this.lifePoints);
-        this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
-      }
-    } else {
-      if (this.selectedCard.atk > this.selectedTarget.def) {
-        this.lifePoints -= this.selectedCard.atk - this.selectedTarget.def;
-        console.log('Player life points:', this.lifePoints);
-        this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedTarget);
-      } else {
-        this.opponentLifePoints -= this.selectedTarget.def - this.selectedCard.atk;
-        console.log('Opponent life points:', this.opponentLifePoints);
-        this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedCard);
-      }
-    }
+  // Select a target from the opponent's field
+  selectTarget(card: any) {
+    this.selectedTarget = card;
+  }
 
+  // Play card function (Customize as per your game mechanics)
+  playCard(card: any) {
+    console.log(`Playing card: ${card.name}`);
+    // Additional logic to play the card can be added here
+  }
+
+  // Move to next phase (placeholder)
+  nextPhase() {
+    this.phase = this.phase === 'draw' ? 'main' : 'draw';
+  }
+
+  // Reset game function (reset all states)
+  resetGame() {
+    this.lifePoints = 4000;
+    this.opponentLifePoints = 4000;
+    this.playerTurn = true;
+    this.phase = 'draw';
     this.selectedCard = null;
     this.selectedTarget = null;
-    this.checkGameEnd();
-  }
-
-  checkGameEnd() {
-    if (this.lifePoints <= 0) {
-      this.duelResult = 'You lose!';
-      alert(this.duelResult);
-      this.resetGame();
-    } else if (this.opponentLifePoints <= 0) {
-      this.duelResult = 'You win!';
-      alert(this.duelResult);
-      this.resetGame();
-    }
-  }
-
-  resetGame() {
-    this.lifePoints = 8000;
-    this.opponentLifePoints = 8000;
-    this.playerTurn = true;
     this.playerHand = [];
     this.opponentHand = [];
     this.playerMonsterCards = [];
     this.opponentMonsterCards = [];
-    this.drawInitialCards();
-    console.log('Game reset');
-  }
-
-  endTurn() {
-    this.playerTurn = !this.playerTurn;
-    this.selectedCard = null;
-    this.selectedTarget = null;
-    this.phase = 'draw';
-    this.drawCard();
-    console.log('Turn ended. Player turn:', this.playerTurn);
-
-    if (!this.playerTurn) {
-      this.opponentTurn();
-    }
-  }
-
-  nextPhase() {
-    if (this.phase === 'draw') {
-      this.phase = 'main';
-    } else if (this.phase === 'main') {
-      this.phase = 'battle';
-    } else if (this.phase === 'battle') {
-      this.phase = 'end';
-      this.endTurn();
-    }
-    console.log('Phase:', this.phase);
-  }
-
-  opponentTurn() {
-    // Opponent draws a card
-    this.drawCard();
-
-    // Opponent plays a random card from their hand if they have any
-    if (this.opponentHand.length > 0) {
-      const randomIndex = Math.floor(Math.random() * this.opponentHand.length);
-      const cardToPlay = this.opponentHand[randomIndex];
-
-      console.log('Opponent plays:', cardToPlay);
-      this.opponentMonsterCards.push(cardToPlay);
-
-      // Remove card from opponent's hand
-      this.opponentHand = this.opponentHand.filter(c => c !== cardToPlay);
-    }
-
-    // Opponent attacks if they have monsters
-    if (this.opponentMonsterCards.length > 0 && this.playerMonsterCards.length > 0) {
-      const attackingCard = this.opponentMonsterCards[0]; // First monster
-      const targetCard = this.playerMonsterCards[0]; // First player's monster
-
-      this.selectedCard = attackingCard;
-      this.selectedTarget = targetCard;
-
-      console.log('Opponent attacks with:', attackingCard);
-      this.attack();
-    }
-
-    // End opponent's turn
-    this.endTurn();
   }
 }

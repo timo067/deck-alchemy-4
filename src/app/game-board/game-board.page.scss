@@ -1,5 +1,4 @@
 .game-board {
-  background-color: transparent;
   color: white;
   text-align: center;
   padding: 20px;
@@ -59,8 +58,15 @@ ion-button {
 }
 
 .card-image {
-  width: 100%;
-  height: auto; /* Maintain aspect ratio */
-  object-fit: contain; /* Ensure the whole image is visible */
-  border-radius: 8px;
+  width: 100%; /* Ensure full width */
+  height: 100%; /* Ensure full height */
+  object-fit: cover; /* Avoid distortion */
+  border-radius: 8px; /* Rounded corners */
+}
+
+ion-content {
+  --background-size: cover;
+  --background-position: center;
+  --background-repeat: no-repeat;
+  --background-attachment: fixed; /* Optional: keeps the background fixed when scrolling */
 }
