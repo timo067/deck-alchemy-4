@@ -18,7 +18,10 @@ export class CardService {
     );
   }
 
-  getNormalMonsters(cards: any[]): any[] {
+  getNormalMonsters(cards: any[] | undefined | null): any[] {
+    if (!cards) {
+      return []; // Return an empty array if cards is undefined or null
+    }
     return cards.filter(card => card.type === 'Normal Monster');
   }
 }

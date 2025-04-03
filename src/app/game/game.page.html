@@ -26,6 +26,21 @@
     </ion-card-content>
   </ion-card>
 
+<!-- Card Search -->
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>Search Cards</ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="searchCards()"></ion-searchbar>
+    <ion-list>
+      <ion-item *ngFor="let card of searchResults" (click)="addCardToPlayerDeck(card)">
+        {{ card.name }}
+      </ion-item>
+    </ion-list>
+  </ion-card-content>
+</ion-card>
+
   <div class="background-selection">
     <h3>Select Background</h3>
     <ion-select [(ngModel)]="selectedBackground" placeholder="Choose a background">

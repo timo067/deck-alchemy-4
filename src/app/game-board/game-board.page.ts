@@ -22,8 +22,8 @@ export class GameBoardPage implements OnInit {
   duelResult: string = '';
   playerTurn: boolean = true;
   phase: string = 'draw';
-  background: string = 'default.jpg'; // Fallback background
-
+  background: string = 'assets/images/Blue Eyes White Dragon.jpg'; // Default background image
+  
   constructor(
     private cardService: CardService,
     private route: ActivatedRoute,
@@ -32,10 +32,8 @@ export class GameBoardPage implements OnInit {
   
   ngOnInit() {
     // Get navigation state
-    const state = this.router.getCurrentNavigation()?.extras.state;
-  
-    // If a background was passed, use it; otherwise, set a default
-    this.background = state?.['background'] ? `assets/images/${state['background']}` : 'assets/images/Blue Eyes White Dragon.jpg';
+    const state = this.router.getCurrentNavigation()?.extras.state as { background?: string };
+    this.background = state?.background ? `assets/images/${state.background}` : 'assets/images/Blue Eyes White Dragon.jpg';
   
     console.log("Selected Background:", this.background);
   

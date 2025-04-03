@@ -64,16 +64,29 @@ export class GamePage implements OnInit {
 
   searchCards() {
     if (this.searchTerm.trim() === '') {
-      this.searchResults = [];
+      this.searchResults = []; // Clear the results if search term is empty
       return;
     }
-
-    this.cardService.getCards().subscribe(cards => {
-      this.searchResults = cards.data.filter((card: any) =>
-        card.type === 'Normal Monster' && card.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-    });
-  }
+  
+    this.cardService.getCards().subscribe(
+      (cards) => {
+        if (cards) {
+          // First, filter by "Normal Monster"
+          const normalMonsters = cards.filter((card: any) => card.type === 'Normal Monster');
+          
+          // Then, filter the "Normal Monsters" by the search term (case-insensitive)
+          this.searchResults = normalMonsters.filter((card: any) => 
+            card.name.toLowerCase().includes(this.searchTerm.toLowerCase()) // Case insensitive search
+          );
+        } else {
+          console.error('No cards data received');
+        }
+      },
+      (error) => {
+        console.error('Error fetching cards', error);
+      }
+    );
+  }  
 
   addCardToPlayerDeck(card: any) {
     const cardCount = this.playerDeck.cards.filter((c: any) => c.name === card.name).length;
