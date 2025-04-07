@@ -1,60 +1,106 @@
 .game-board {
+  display: flex;
   color: white;
   text-align: center;
-  padding: 20px;
-}
+  height: 100vh;
 
-.monster-cards {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
-}
+  .sidebar {
+    width: 250px;
+    height: 100vh;
 
-.monster-card {
-  background: #1e1e1e;
-  border: 2px solid #ffd700;
-  border-radius: 10px;
-  padding: 10px;
-  width: 160px;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  text-align: center;
-}
+    .game-controls button {
+      background-color: #0066ff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 1.2em;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: 0.3s;
 
-ion-thumbnail {
-  width: 100px;
-  height: 150px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-}
+      &:hover{
+        background-color: #0044cc;
+      }
+    }
 
-ion-button {
-  background-color: #ff4500;
-  color: white;
-  font-weight: bold;
+  }
+
+  .game-content{
+    flex: 1;
+    height: 100vh;
+    overflow: hidden;
+
+    .game-area{
+      height: 25vh;
+      overflow: hidden;
+
+      h2{
+        margin-top: 0;
+      }
+
+      .monster-cards {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+
+        .monster-card {
+          background: #1e1e1e;
+          border: 2px solid #ffd700;
+          border-radius: 10px;
+          padding: 10px;
+          width: 160px;
+          box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+          text-align: center;
+          position: relative;
+          
+          .animation-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Prevent interaction with the cloned card */
+          }
+          
+          .cloned-card {
+            position: fixed;
+            width: 100px; /* Adjust to match the card size */
+            height: 150px; /* Adjust to match the card size */
+            z-index: 1000;
+            transition: top 1s ease, left 1s ease; /* Smooth animation */
+          }
+
+          &:hover{
+            ion-button{
+              display: block;
+            }
+          }
+
+          ion-thumbnail {
+            width: 100px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+          }
+
+          ion-button {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            display: none;
+
+          }
+        }
+      }
+    }
+  }
 }
 
 .turn-indicator {
   font-size: 1.5em;
   font-weight: bold;
   margin: 10px 0;
-}
-
-.game-controls button {
-  background-color: #0066ff;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  font-size: 1.2em;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: 0.3s;
-}
-
-.game-controls button:hover {
-  background-color: #0044cc;
 }
 
 .card-image {
@@ -65,8 +111,10 @@ ion-button {
 }
 
 ion-content {
-  --background-size: cover;
-  --background-position: center;
-  --background-repeat: no-repeat;
-  --background-attachment: fixed; /* Optional: keeps the background fixed when scrolling */
+ // --background: url('/assets/images/Blue Eyes White Dragon.jpg') no-repeat center center / cover !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  padding: 0; /* Remove default padding */
 }
+

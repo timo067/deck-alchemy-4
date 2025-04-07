@@ -62,6 +62,20 @@ export class GamePage implements OnInit {
     this.playerStarts = Math.random() < 0.5;
   }
 
+  changeBackground(backgroundImage: string) {
+    this.selectedBackground = backgroundImage;
+  }
+  
+  deleteDeck(deckType: 'player' | 'enemy') {
+    if (deckType === 'player') {
+      this.playerDeck = { name: '', cards: [] }; // Reset the player deck
+      alert('Player deck has been deleted.');
+    } else if (deckType === 'enemy') {
+      this.enemyDeck = { name: 'Enemy Deck', cards: [] }; // Reset the enemy deck
+      alert('Enemy deck has been deleted.');
+    }
+  }
+
   searchCards() {
     if (this.searchTerm.trim() === '') {
       this.searchResults = []; // Clear the results if search term is empty
@@ -130,14 +144,14 @@ export class GamePage implements OnInit {
       alert('Player deck must have 40 cards.');
       return;
     }
-  
+    
     // Navigate to the GameBoardPage
     this.router.navigate(['/game-board'], {
       state: {
-        playerDeck: this.playerDeck,
-        enemyDeck: this.enemyDeck.cards,
-        background: this.selectedBackground // ✅ Pass background
+        playerDeck: this.playerDeck.cards, // Pass the player deck
+        enemyDeck: this.enemyDeck.cards,  // Pass the enemy deck
+        background: this.selectedBackground // Pass the selected background
       }
-    });    
+    });
   }
 }

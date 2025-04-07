@@ -1,96 +1,31 @@
-<ion-content 
-  [fullscreen]="true"
-  [style.background-image]="'url(/assets/images/' + background + ')'"
-  [style.background-size]="'cover'"
-  [style.background-position]="'center'"
-  [style.background-repeat]="'no-repeat'">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Yu-Gi-Oh! Game Board</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" [style.background-image]="'url(' + background + ')'">
+  <div class="animation-container">
+    <div *ngIf="clonedCard" class="cloned-card" [style.top.px]="clonedCard.top" [style.left.px]="clonedCard.left">
+      <img [src]="clonedCard.image" alt="Cloned Card" />
+    </div>
+  </div>
 
   <div class="game-board">
-    <h1>Yu-Gi-Oh! Game Board</h1>
-
-    <!-- Score and Turn Information -->
-    <div class="score">
-      <p>Player Life Points: {{ lifePoints }}</p>
-      <p>Opponent Life Points: {{ opponentLifePoints }}</p>
-    </div>
-    <div class="turn-indicator">
-      <p>Current Turn: {{ playerTurn ? 'Player' : 'Opponent' }}</p>
-      <p>Phase: {{ phase }}</p>
-    </div>
-
-    <!-- Battle Actions -->
-    <div class="battle-actions">
-      <p *ngIf="selectedCard">⚔️ Selected Card: {{ selectedCard.name }}</p>
-      <p *ngIf="selectedTarget">🎯 Target: {{ selectedTarget.name }}</p>
-      <ion-button (click)="attack()" [disabled]="!selectedCard || !selectedTarget">Attack</ion-button>
-    </div>
-
-    <!-- Opponent's Hand -->
-    <div class="opponent-hand">
-      <h2>Opponent's Hand</h2>
-      <div class="monster-cards">
-        <div *ngFor="let card of opponentHand" class="monster-card">
-          <ion-thumbnail slot="start">
-            <img src="assets/images/sleeves.jpg" alt="Card Back">
-          </ion-thumbnail>
-        </div>
+    <!-- Player's Field -->
+    <div class="monster-cards">
+      <div *ngFor="let card of playerMonsterCards" class="monster-card" [attr.data-card-id]="card.id">
+        <ion-thumbnail>
+          <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}" />
+        </ion-thumbnail>
+        <ion-label>{{ card?.name }}</ion-label>
+        <ion-button (click)="selectCard(card)">Select</ion-button>
       </div>
     </div>
 
     <!-- Opponent's Field -->
-    <div class="opponent-field">
-      <h2>Opponent's Field</h2>
-      <div class="monster-cards">
-        <div *ngFor="let card of opponentMonsterCards" class="monster-card">
-          <ion-thumbnail slot="start">
-            <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}">
-          </ion-thumbnail>
-          <ion-label>{{ card?.name }}</ion-label>
-          <ion-button (click)="selectTarget(card)">Select Target</ion-button>
-        </div>
+    <div class="monster-cards">
+      <div *ngFor="let card of opponentMonsterCards" class="monster-card" [attr.data-card-id]="card.id">
+        <ion-thumbnail>
+          <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}" />
+        </ion-thumbnail>
+        <ion-label>{{ card?.name }}</ion-label>
+        <ion-button (click)="selectTarget(card)">Select Target</ion-button>
       </div>
     </div>
-
-    <!-- Player's Field -->
-    <div class="player-field">
-      <h2>Your Field</h2>
-      <div class="monster-cards">
-        <div *ngFor="let card of playerMonsterCards" class="monster-card">
-          <ion-thumbnail slot="start">
-            <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}">
-          </ion-thumbnail>
-          <ion-label>{{ card?.name }}</ion-label>
-          <ion-button (click)="selectCard(card)">Select</ion-button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Player's Hand -->
-    <div class="player-hand">
-      <h2>Your Hand</h2>
-      <div class="monster-cards">
-        <div *ngFor="let card of playerHand" class="monster-card">
-          <ion-thumbnail slot="start">
-            <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}">
-          </ion-thumbnail>
-          <ion-label>{{ card?.name }}</ion-label>
-          <ion-button (click)="playCard(card)">Play</ion-button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Game Controls -->
-    <div class="game-controls">
-      <div>
-        <button (click)="nextPhase()">Next Phase</button>
-      </div>
-      <button (click)="resetGame()">Reset Game</button>
-    </div>
-
   </div>
 </ion-content>
