@@ -23,35 +23,41 @@ export class GameBoardPage implements OnInit {
   playerTurn: boolean = true;
   phase: string = 'draw';
   background: string = 'default.jpg'; // Fallback background
-  clonedCard: { top: number; left: number; image: string } | null = null; // For animation
+  clonedCard: { top: number; left: number; image: string } | null = null;
+  clonedCardAnimating: boolean = false;
+  
 
   constructor(
     private cardService: CardService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
-
+  
   ngOnInit() {
+    // Get navigation state
     const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras?.state;
+  const state = navigation?.extras?.state;
+  
+  if (state) {
+    this.playerDeck = state['playerDeck'] || [];
+    this.background = state['background']
+      ? `assets/images/${state['background']}`
+      : 'assets/images/Blue Eyes White Dragon.jpg'; // Default background
+  }
 
-    if (state) {
-      this.playerDeck = state['playerDeck'] || [];
-      this.background = state['background']
-        ? `assets/images/${state['background']}`
-        : 'assets/images/Blue Eyes White Dragon.jpg'; // Default background
-    }
-
-    console.log('Player Deck:', this.playerDeck);
-    console.log('Opponent Deck:', this.opponentDeck);
-    console.log('Background:', this.background);
-
+    // If a background was passed, use it; otherwise, set a default
+    this.background = state?.['background'] ? `assets/images/${state['background']}` : 'assets/images/Blue Eyes White Dragon.jpg';
+  
+    console.log("Selected Background:", this.background);
+  
+    // Fetch Cards & Initialize Decks
     this.cardService.getCards().subscribe(cards => {
       this.opponentDeck = this.cardService.getNormalMonsters(cards);
       this.drawInitialCards();
     });
   }
-
+  
+  
   drawInitialCards() {
     this.playerHand = this.drawCards(this.playerDeck, 5);
     this.opponentHand = this.drawCards(this.opponentDeck, 5);
@@ -91,50 +97,72 @@ export class GameBoardPage implements OnInit {
     }
   }
 
+  playCard(card: any) {
+    if (this.phase === 'main') {
+      if (this.playerTurn) {
+        console.log('Playing card:', card);
+        this.playerMonsterCards.push(card);
+        this.playerHand = this.playerHand.filter(c => c !== card);
+      } else {
+        console.log('Playing card:', card);
+        this.opponentMonsterCards.push(card);
+        this.opponentHand = this.opponentHand.filter(c => c !== card);
+      }
+      this.selectedCard = null;
+    }
+  }
+
   attack() {
     if (this.phase !== 'battle') {
       console.log('Not in battle phase!');
       return;
     }
-
+  
     if (!this.selectedCard || !this.selectedTarget) {
       console.log('Select both an attacking card and a target card.');
       return;
     }
-
-    const attackingCardElement = document.querySelector(`[data-card-id="${this.selectedCard.id}"]`);
-    const targetCardElement = document.querySelector(`[data-card-id="${this.selectedTarget.id}"]`);
-
-    if (attackingCardElement && targetCardElement) {
-      const attackingRect = attackingCardElement.getBoundingClientRect();
-      const targetRect = targetCardElement.getBoundingClientRect();
-
-      const cardImage = this.selectedCard.card_images?.[0]?.image_url || 'assets/images/default-card.jpg';
-
+  
+    const attacker = document.querySelector(`[data-card-id="${this.selectedCard.id}"]`) as HTMLElement;
+    const target = document.querySelector(`[data-card-id="${this.selectedTarget.id}"]`) as HTMLElement;
+  
+    if (attacker && target) {
+      const attackerRect = attacker.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+  
+      // Initialize the cloned card
       this.clonedCard = {
-        top: attackingRect.top,
-        left: attackingRect.left,
-        image: cardImage,
+        top: attackerRect.top,
+        left: attackerRect.left,
+        image: this.selectedCard.card_images[0]?.image_url ?? 'assets/images/default-card.jpg',
       };
-
-      (attackingCardElement as HTMLElement).style.visibility = 'hidden';
-
+  
+      this.clonedCardAnimating = true;
+  
+      // Hide the original card (attacker) during the animation
+      (attacker as HTMLElement).style.visibility = 'hidden';
+  
+      // Perform the animation
       setTimeout(() => {
-        this.clonedCard = {
-          ...this.clonedCard,
-          top: targetRect.top,
-          left: targetRect.left,
-        };
-
+        // Set the final position for the cloned card
+        if (this.clonedCard) {
+          this.clonedCard.top = targetRect.top;
+        }
+        if (this.clonedCard) {
+          this.clonedCard.left = targetRect.left;
+        }
+  
+        // Allow time for the animation to complete before resetting
         setTimeout(() => {
           this.clonedCard = null;
-          (attackingCardElement as HTMLElement).style.visibility = 'visible';
-          this.performAttack();
-        }, 1000); // Match the animation duration
-      }, 0);
+          this.clonedCardAnimating = false;
+          (attacker as HTMLElement).style.visibility = 'visible'; // Show the attacker card again
+          this.performAttack(); // Perform attack logic after animation
+        }, 500); // The second timeout is based on the animation duration
+      }, 10);
     }
   }
-
+  
   performAttack() {
     if (this.playerTurn) {
       if (this.selectedCard.atk > this.selectedTarget.def) {
@@ -196,9 +224,15 @@ export class GameBoardPage implements OnInit {
     console.log('Phase:', this.phase);
   }
 
+  // changeBackground(backgroundImage: string) {
+  //   this.selectedBackground = backgroundImage;
+  // }
+  
   opponentTurn() {
+    // Opponent draws a card
     this.drawCard();
 
+    // Opponent plays a random card from their hand if they have any
     if (this.opponentHand.length > 0) {
       const randomIndex = Math.floor(Math.random() * this.opponentHand.length);
       const cardToPlay = this.opponentHand[randomIndex];
@@ -206,12 +240,14 @@ export class GameBoardPage implements OnInit {
       console.log('Opponent plays:', cardToPlay);
       this.opponentMonsterCards.push(cardToPlay);
 
+      // Remove card from opponent's hand
       this.opponentHand = this.opponentHand.filter(c => c !== cardToPlay);
     }
 
+    // Opponent attacks if they have monsters
     if (this.opponentMonsterCards.length > 0 && this.playerMonsterCards.length > 0) {
-      const attackingCard = this.opponentMonsterCards[0];
-      const targetCard = this.playerMonsterCards[0];
+      const attackingCard = this.opponentMonsterCards[0]; // First monster
+      const targetCard = this.playerMonsterCards[0]; // First player's monster
 
       this.selectedCard = attackingCard;
       this.selectedTarget = targetCard;
@@ -220,6 +256,7 @@ export class GameBoardPage implements OnInit {
       this.attack();
     }
 
+    // End opponent's turn
     this.endTurn();
   }
 }

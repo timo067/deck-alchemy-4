@@ -53,7 +53,7 @@
           box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
           text-align: center;
           position: relative;
-          
+
           .animation-container {
             position: relative;
             width: 100%;
@@ -62,12 +62,24 @@
           }
           
           .cloned-card {
-            position: fixed;
-            width: 100px; /* Adjust to match the card size */
-            height: 150px; /* Adjust to match the card size */
-            z-index: 1000;
-            transition: top 1s ease, left 1s ease; /* Smooth animation */
+            position: absolute;
+            transition: top 0.5s ease, left 0.5s ease;
+            z-index: 999;
           }
+          
+          .animating {
+            opacity: 1;
+          }
+          
+          /* Initial opacity should be 0 until animation starts */
+          .cloned-card {
+            opacity: 0;
+          }
+          
+          .cloned-card.animating {
+            opacity: 1;
+            transform: translate(var(--x), var(--y));
+          }          
 
           &:hover{
             ion-button{
