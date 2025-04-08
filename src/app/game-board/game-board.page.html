@@ -1,12 +1,22 @@
 <ion-content>
-  <div
-    *ngIf="clonedCard"
-    class="cloned-card"
-    [class.animating]="clonedCardAnimating"
-    [style.top.px]="clonedCard.top"
-    [style.left.px]="clonedCard.left"
-    [style.background-image]="'url(' + clonedCard.image + ')'">
-  </div>
+<!-- Attack Animation Overlay -->
+<div
+  *ngIf="clonedCard"
+  class="cloned-card"
+  [style.top.px]="clonedCard.top"
+  [style.left.px]="clonedCard.left"
+  [style.backgroundImage]="'url(' + clonedCard.image + ')'"
+  [style.transform]="transformStyle"
+></div>
+
+<div
+  *ngIf="explosion"
+  class="explosion"
+  [style.top.px]="explosion.top"
+  [style.left.px]="explosion.left"
+  style="transform: translate(-50%, -50%);"
+></div>
+
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Yu-Gi-Oh! Game Board</ion-title>
@@ -31,11 +41,6 @@
       <div class="battle-actions">
         <p *ngIf="selectedCard">⚔️ Selected Card: {{ selectedCard.name }}</p>
         <p *ngIf="selectedTarget">🎯 Target: {{ selectedTarget.name }}</p>
-        <ion-button
-          (click)="attack()"
-          [disabled]="!selectedCard || !selectedTarget"
-          >Attack</ion-button
-        >
       </div>
 
       <!-- Game Controls -->

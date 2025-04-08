@@ -25,6 +25,8 @@ export class GameBoardPage implements OnInit {
   background: string = 'default.jpg'; // Fallback background
   clonedCard: { top: number; left: number; image: string } | null = null;
   clonedCardAnimating: boolean = false;
+  transformStyle: string = '';
+  explosion: { top: number; left: number } | null = null;
   
 
   constructor(
@@ -85,17 +87,43 @@ export class GameBoardPage implements OnInit {
 
   selectCard(card: any) {
     if (this.phase === 'battle') {
+      // Remove the class from the previously selected card
+      const previousSelectedCard = document.querySelector('.selected-card');
+      if (previousSelectedCard) {
+        previousSelectedCard.classList.remove('selected-card');
+      }
+  
       this.selectedCard = card;
       console.log(`⚔️ Attacking Card Selected: ${card.name}`);
+  
+      // Add the class to the newly selected card
+      const cardElement = document.querySelector(`[data-card-id="${card.id}"]`);
+      if (cardElement) {
+        cardElement.classList.add('selected-card');
+      }
     }
   }
 
   selectTarget(card: any) {
-    if (this.phase === 'battle') {
-      this.selectedTarget = card;
-      console.log(`🎯 Target Selected: ${card.name}`);
+  if (this.phase === 'battle') {
+    // Remove the class from the previously selected target
+    const previousTargetCard = document.querySelector('.targeted-card');
+    if (previousTargetCard) {
+      previousTargetCard.classList.remove('targeted-card');
     }
+
+    this.selectedTarget = card;
+    console.log(`🎯 Target Selected: ${card.name}`);
+
+    // Add the class to the newly selected target
+    const cardElement = document.querySelector(`[data-card-id="${card.id}"]`);
+    if (cardElement) {
+      cardElement.classList.add('targeted-card');
+    }
+
+    this.attack(); // Automatically attack after selecting a target
   }
+}
 
   playCard(card: any) {
     if (this.phase === 'main') {
@@ -113,56 +141,61 @@ export class GameBoardPage implements OnInit {
   }
 
   attack() {
-    if (this.phase !== 'battle') {
-      console.log('Not in battle phase!');
-      return;
-    }
-  
-    if (!this.selectedCard || !this.selectedTarget) {
-      console.log('Select both an attacking card and a target card.');
-      return;
-    }
+    if (this.phase !== 'battle') return;
+    if (!this.selectedCard || !this.selectedTarget) return;
   
     const attacker = document.querySelector(`[data-card-id="${this.selectedCard.id}"]`) as HTMLElement;
     const target = document.querySelector(`[data-card-id="${this.selectedTarget.id}"]`) as HTMLElement;
+    if (!attacker || !target) return;
   
-    if (attacker && target) {
-      const attackerRect = attacker.getBoundingClientRect();
-      const targetRect = target.getBoundingClientRect();
+    const attackerRect = attacker.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
   
-      // Initialize the cloned card
-      this.clonedCard = {
-        top: attackerRect.top,
-        left: attackerRect.left,
-        image: this.selectedCard.card_images[0]?.image_url ?? 'assets/images/default-card.jpg',
-      };
+    const deltaX = targetRect.left - attackerRect.left;
+    const deltaY = targetRect.top - attackerRect.top;
   
-      this.clonedCardAnimating = true;
+    // Add CSS classes for color change
+    attacker.classList.add('attacking-card');
+    target.classList.add('targeted-card');
   
-      // Hide the original card (attacker) during the animation
-      (attacker as HTMLElement).style.visibility = 'hidden';
+    this.clonedCard = {
+      top: attackerRect.top,
+      left: attackerRect.left,
+      image: this.selectedCard.card_images[0]?.image_url ?? 'assets/images/default-card.jpg',
+    };
   
-      // Perform the animation
-      setTimeout(() => {
-        // Set the final position for the cloned card
-        if (this.clonedCard) {
-          this.clonedCard.top = targetRect.top;
-        }
-        if (this.clonedCard) {
-          this.clonedCard.left = targetRect.left;
-        }
+    attacker.style.visibility = 'hidden';
   
-        // Allow time for the animation to complete before resetting
-        setTimeout(() => {
-          this.clonedCard = null;
-          this.clonedCardAnimating = false;
-          (attacker as HTMLElement).style.visibility = 'visible'; // Show the attacker card again
-          this.performAttack(); // Perform attack logic after animation
-        }, 500); // The second timeout is based on the animation duration
-      }, 10);
-    }
+    setTimeout(() => {
+      this.transformStyle = `translate(${deltaX}px, ${deltaY}px) scale(1.2)`;
+    }, 10);
+  
+    setTimeout(() => {
+      this.clonedCard = null;
+      this.transformStyle = '';
+      attacker.style.visibility = 'visible';
+  
+      // Remove CSS classes after the attack
+      attacker.classList.remove('attacking-card');
+      target.classList.remove('targeted-card');
+  
+      // Trigger explosion effect before attack logic
+      this.triggerExplosion(targetRect);
+      this.performAttack();
+    }, 600); // Match the animation duration
   }
   
+  triggerExplosion(targetRect: DOMRect) {
+    this.explosion = {
+      top: targetRect.top,
+      left: targetRect.left,
+    };
+  
+    setTimeout(() => {
+      this.explosion = null;
+    }, 600); // Match with fadeOut duration in SCSS
+  }  
+
   performAttack() {
     if (this.playerTurn) {
       if (this.selectedCard.atk > this.selectedTarget.def) {
@@ -181,12 +214,12 @@ export class GameBoardPage implements OnInit {
         this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedCard);
       }
     }
-
+  
     this.selectedCard = null;
     this.selectedTarget = null;
     this.checkGameEnd();
   }
-
+  
   checkGameEnd() {
     if (this.lifePoints <= 0) {
       this.duelResult = 'You lose!';
