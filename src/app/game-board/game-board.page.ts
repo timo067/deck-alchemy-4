@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CardService } from '../services/card.service';
+import { Renderer2 } from '@angular/core';
 
 @Component({
   selector: 'app-game-board',
@@ -23,16 +24,17 @@ export class GameBoardPage implements OnInit {
   playerTurn: boolean = true;
   phase: string = 'draw';
   background: string = 'default.jpg'; // Fallback background
-  clonedCard: { top: number; left: number; image: string } | null = null;
+  clonedCard: { top: number; left: number; image: string, transformStyle:string } | null = null;
   clonedCardAnimating: boolean = false;
   transformStyle: string = '';
   explosion: { top: number; left: number } | null = null;
-  
+  hasSummonedThisTurn: boolean = false; // New flag to track if a card has been summoned
 
   constructor(
     private cardService: CardService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private renderer: Renderer2
   ) {}
   
   ngOnInit() {
@@ -125,18 +127,69 @@ export class GameBoardPage implements OnInit {
   }
 }
 
+  summonCard(card: any, isPlayer: boolean) {
+    // Create the summoned card element
+    const summonedCard = this.renderer.createElement('div');
+    this.renderer.addClass(summonedCard, 'summoned-card');
+
+    // Set the card's image as the background
+    this.renderer.setStyle(
+      summonedCard,
+      'background-image',
+      `url(${card.card_images[0]?.image_url || 'assets/images/default-card.jpg'})`
+    );
+
+    // Set initial position (off-screen)
+    this.renderer.setStyle(summonedCard, 'position', 'fixed');
+    this.renderer.setStyle(summonedCard, 'top', isPlayer ? '100vh' : '-150px'); // Player summons from bottom, opponent from top
+    this.renderer.setStyle(summonedCard, 'left', '50%');
+    this.renderer.setStyle(summonedCard, 'transform', 'translateX(-50%)');
+    this.renderer.setStyle(summonedCard, 'width', '120px');
+    this.renderer.setStyle(summonedCard, 'height', '180px');
+    this.renderer.setStyle(summonedCard, 'background-size', 'cover');
+    this.renderer.setStyle(summonedCard, 'z-index', '1000');
+    this.renderer.setStyle(summonedCard, 'transition', 'top 0.5s ease-out');
+
+    // Append the summoned card to the body
+    this.renderer.appendChild(document.body, summonedCard);
+
+    // Animate the card to its final position
+    setTimeout(() => {
+      this.renderer.setStyle(summonedCard, 'top', isPlayer ? '50vh' : '30vh'); // Adjust based on player or opponent
+    }, 0);
+
+    // Remove the summoned card element after the animation
+    setTimeout(() => {
+      this.renderer.removeChild(document.body, summonedCard);
+
+      // Add the card to the field
+      if (isPlayer) {
+        this.playerMonsterCards.push(card);
+      } else {
+        this.opponentMonsterCards.push(card);
+      }
+    }, 500); // Match the animation duration
+  }
+
   playCard(card: any) {
     if (this.phase === 'main') {
+      if (this.hasSummonedThisTurn) {
+        alert('You can only summon one card per turn!');
+        return;
+      }
+
       if (this.playerTurn) {
         console.log('Playing card:', card);
-        this.playerMonsterCards.push(card);
+        this.summonCard(card, true); // Trigger summon animation for the player
         this.playerHand = this.playerHand.filter(c => c !== card);
       } else {
         console.log('Playing card:', card);
-        this.opponentMonsterCards.push(card);
+        this.summonCard(card, false); // Trigger summon animation for the opponent
         this.opponentHand = this.opponentHand.filter(c => c !== card);
       }
+
       this.selectedCard = null;
+      this.hasSummonedThisTurn = true; // Mark that a card has been summoned this turn
     }
   }
 
@@ -161,14 +214,16 @@ export class GameBoardPage implements OnInit {
     this.clonedCard = {
       top: attackerRect.top,
       left: attackerRect.left,
+      transformStyle: `translate(${deltaX}px, ${deltaY}px) scale(1.2)`,
       image: this.selectedCard.card_images[0]?.image_url ?? 'assets/images/default-card.jpg',
     };
   
     attacker.style.visibility = 'hidden';
+    attacker.classList.remove('selected-card');
   
-    setTimeout(() => {
-      this.transformStyle = `translate(${deltaX}px, ${deltaY}px) scale(1.2)`;
-    }, 10);
+    //setTimeout(() => {
+      
+    //}, 10);
   
     setTimeout(() => {
       this.clonedCard = null;
@@ -237,6 +292,7 @@ export class GameBoardPage implements OnInit {
     this.selectedCard = null;
     this.selectedTarget = null;
     this.phase = 'draw';
+    this.hasSummonedThisTurn = false; // Reset the summon flag for the next turn
     this.drawCard();
     console.log('Turn ended. Player turn:', this.playerTurn);
 

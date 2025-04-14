@@ -26,19 +26,24 @@ export class AuthService {
     }
     return result;
   }
-  
+
   async login(email: string, password: string) {
     const result = await this.afAuth.signInWithEmailAndPassword(email, password);
     if (result.user) {
-      const username = await this.getUsername();  // Use existing function
+      const token = await result.user.getIdToken();
+      localStorage.setItem('authToken', token); // Store token in localStorage
+      console.log('Auth token stored in localStorage.');
+
+      const username = await this.getUsername(); // Use existing function
       if (username) {
         this.addLoggedInUser(username);
       }
     }
     return result;
-  }  
-    
+  }
+
   logout() {
+    localStorage.removeItem('authToken'); // Clear token from localStorage
     return this.afAuth.signOut();
   }
 
@@ -60,10 +65,10 @@ export class AuthService {
     try {
       const userId = await this.getUserId();
       if (!userId) return null;
-  
+
       const userDocRef = doc(this.firestore, 'users', userId);
       const userSnap = await getDoc(userDocRef);
-  
+
       if (userSnap.exists()) {
         return userSnap.data()?.['username'] || null;
       } else {
@@ -84,5 +89,27 @@ export class AuthService {
 
   getLoggedInAccounts(): string[] {
     return this.loggedInAccounts;
+  }
+
+  async validateToken(): Promise<boolean> {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.warn('No auth token found in localStorage.');
+      return false;
+    }
+
+    try {
+      const user = await this.afAuth.currentUser;
+      if (user) {
+        const validToken = await user.getIdToken();
+        return validToken === token; // Validate token matches
+      } else {
+        console.warn('No authenticated user found.');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error validating token:', error);
+      return false;
+    }
   }
 }

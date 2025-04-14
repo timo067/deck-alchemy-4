@@ -25,7 +25,7 @@ export class GamePage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadPlayerDeck();
+    this.restoreState(); // Restore state from localStorage
     this.initializeEnemyDeck();
     this.coinFlip();
   }
@@ -33,8 +33,13 @@ export class GamePage implements OnInit {
   async loadPlayerDeck() {
     try {
       this.playerDeck = await this.playerDeckService.getPlayerDeck();
+      console.log('Player deck loaded:', this.playerDeck);
+
+      // Save the player deck to localStorage for persistence
+      localStorage.setItem('playerDeck', JSON.stringify(this.playerDeck));
     } catch (error) {
       console.error('Error loading player deck:', error);
+      alert('Failed to load player deck. Please ensure you are logged in.');
     }
   }
 
@@ -44,8 +49,37 @@ export class GamePage implements OnInit {
       const normalMonsters = cards.data.filter((card: any) => card.type === 'Normal Monster');
       this.enemyDeck.cards = this.getRandomCards(normalMonsters, 40); // Fill enemy deck with 40 random cards
       console.log('Enemy Deck initialized:', this.enemyDeck);
+
+      // Save the enemy deck to localStorage for persistence
+      localStorage.setItem('enemyDeck', JSON.stringify(this.enemyDeck));
     } catch (error) {
       console.error('Error initializing enemy deck:', error);
+      alert('Failed to initialize enemy deck.');
+    }
+  }
+
+  restoreState() {
+    // Restore player deck from localStorage
+    const savedPlayerDeck = localStorage.getItem('playerDeck');
+    if (savedPlayerDeck) {
+      this.playerDeck = JSON.parse(savedPlayerDeck);
+      console.log('Player deck restored from localStorage:', this.playerDeck);
+    } else {
+      this.loadPlayerDeck(); // Load from Firestore if not in localStorage
+    }
+
+    // Restore enemy deck from localStorage
+    const savedEnemyDeck = localStorage.getItem('enemyDeck');
+    if (savedEnemyDeck) {
+      this.enemyDeck = JSON.parse(savedEnemyDeck);
+      console.log('Enemy deck restored from localStorage:', this.enemyDeck);
+    }
+
+    // Restore background from localStorage
+    const savedBackground = localStorage.getItem('selectedBackground');
+    if (savedBackground) {
+      this.selectedBackground = savedBackground;
+      console.log('Background restored from localStorage:', this.selectedBackground);
     }
   }
 
@@ -60,18 +94,25 @@ export class GamePage implements OnInit {
 
   coinFlip() {
     this.playerStarts = Math.random() < 0.5;
+    console.log('Coin flip result - Player starts:', this.playerStarts);
   }
 
   changeBackground(backgroundImage: string) {
     this.selectedBackground = backgroundImage;
+
+    // Save the selected background to localStorage for persistence
+    localStorage.setItem('selectedBackground', this.selectedBackground);
+    console.log('Background changed to:', this.selectedBackground);
   }
-  
+
   deleteDeck(deckType: 'player' | 'enemy') {
     if (deckType === 'player') {
       this.playerDeck = { name: '', cards: [] }; // Reset the player deck
+      localStorage.removeItem('playerDeck'); // Remove from localStorage
       alert('Player deck has been deleted.');
     } else if (deckType === 'enemy') {
       this.enemyDeck = { name: 'Enemy Deck', cards: [] }; // Reset the enemy deck
+      localStorage.removeItem('enemyDeck'); // Remove from localStorage
       alert('Enemy deck has been deleted.');
     }
   }
@@ -98,6 +139,7 @@ export class GamePage implements OnInit {
       },
       (error) => {
         console.error('Error fetching cards', error);
+        alert('Failed to fetch cards. Please try again later.');
       }
     );
   }  
@@ -111,6 +153,10 @@ export class GamePage implements OnInit {
 
     if (this.playerDeck.cards.length < 40) {
       this.playerDeck.cards.push(card);
+      console.log(`Card added to player deck: ${card.name}`);
+
+      // Save the updated player deck to localStorage
+      localStorage.setItem('playerDeck', JSON.stringify(this.playerDeck));
     } else {
       alert('Player deck is full!');
     }
@@ -125,6 +171,9 @@ export class GamePage implements OnInit {
     try {
       await this.playerDeckService.savePlayerDeck(this.playerDeck);
       alert('Player deck saved successfully!');
+
+      // Save the player deck to localStorage for persistence
+      localStorage.setItem('playerDeck', JSON.stringify(this.playerDeck));
     } catch (error) {
       console.error('Error saving player deck:', error);
       alert('Failed to save player deck.');

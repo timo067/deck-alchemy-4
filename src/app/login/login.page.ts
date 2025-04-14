@@ -30,7 +30,12 @@ export class LoginPage {
   
       if (userCredential.user) {
         const userId = userCredential.user.uid;
-  
+
+        // Store the token in localStorage
+        const token = await userCredential.user.getIdToken();
+        localStorage.setItem('authToken', token);
+        console.log('Auth token stored in localStorage.');
+
         // Update last login timestamp
         await this.updateLastLogin(userId);
   

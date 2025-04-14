@@ -54,7 +54,9 @@ export class PlayerDeckService {
       }
     } catch (error) {
       console.error('Error fetching player deck:', error);
-      throw new Error('Failed to fetch player deck.');
+
+      // Add more context to the error message
+      throw new Error('Failed to fetch player deck. Please ensure you are logged in.');
     }
   }
 }
