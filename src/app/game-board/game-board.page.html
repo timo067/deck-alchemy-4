@@ -1,21 +1,21 @@
 <ion-content>
-<!-- Attack Animation Overlay -->
-<div
-  *ngIf="clonedCard"
-  class="cloned-card"
-  [style.top.px]="clonedCard.top"
-  [style.left.px]="clonedCard.left"
-  [style.backgroundImage]="'url(' + clonedCard.image + ')'"
-  [style.transform]="clonedCard.transformStyle"
-></div>
+  <!-- Attack Animation Overlay -->
+  <div
+    *ngIf="clonedCard"
+    class="cloned-card"
+    [style.top.px]="clonedCard.top"
+    [style.left.px]="clonedCard.left"
+    [style.backgroundImage]="'url(' + clonedCard.image + ')'"
+    [style.transform]="clonedCard.transformStyle"
+  ></div>
 
-<div
-  *ngIf="explosion"
-  class="explosion"
-  [style.top.px]="explosion.top"
-  [style.left.px]="explosion.left"
-  style="transform: translate(-50%, -50%);"
-></div>
+  <div
+    *ngIf="explosion"
+    class="explosion"
+    [style.top.px]="explosion.top"
+    [style.left.px]="explosion.left"
+    style="transform: translate(-50%, -50%);"
+  ></div>
 
   <ion-header collapse="condense">
     <ion-toolbar>
@@ -48,6 +48,13 @@
         <div>
           <button (click)="nextPhase()">Next Phase</button>
         </div>
+      </div>
+
+      <!-- Boost Information -->
+      <div class="boost-info">
+        <p *ngIf="randomBoost">
+          🎉 Random Boost: Cards with the <strong>{{ randomBoost.attribute }}</strong> attribute have their stats increased by <strong>{{ randomBoost.percentage }}%</strong>!
+        </p>
       </div>
     </div>
 
@@ -82,11 +89,12 @@
       <div class="game-area">
         <h2>Your Field</h2>
         <div class="monster-cards">
-          <div *ngFor="let card of playerMonsterCards" class="monster-card" [attr.data-card-id]="card.id">
+          <div *ngFor="let card of playerMonsterCards" class="monster-card" [attr.data-card-id]="card.id" [ngClass]="{ 'boosted-card': card.isBoosted }">
             <ion-thumbnail>
               <img [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}" />
             </ion-thumbnail>
             <ion-label>{{ card?.name }}</ion-label>
+            <p *ngIf="card.isBoosted">🔥 Boosted!</p>
             <ion-button (click)="selectCard(card)">Select</ion-button>
           </div>
         </div>
@@ -96,7 +104,7 @@
       <div class="game-area">
         <h2>Your Hand</h2>
         <div class="monster-cards">
-          <div *ngFor="let card of playerHand" class="monster-card">
+          <div *ngFor="let card of playerHand" class="monster-card" [ngClass]="{ 'boosted-card': card.isBoosted }">
             <ion-thumbnail slot="start">
               <img
                 [src]="card?.card_images[0]?.image_url"
@@ -104,6 +112,7 @@
               />
             </ion-thumbnail>
             <ion-label>{{ card?.name }}</ion-label>
+            <p *ngIf="card.isBoosted">🔥 Boosted!</p>
             <ion-button (click)="playCard(card)">Play</ion-button>
           </div>
         </div>

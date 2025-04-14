@@ -29,6 +29,8 @@ export class GameBoardPage implements OnInit {
   transformStyle: string = '';
   explosion: { top: number; left: number } | null = null;
   hasSummonedThisTurn: boolean = false; // New flag to track if a card has been summoned
+  randomBoost: { attribute: string; stat: string; percentage: number } | null = null; // Store the random boost with stat
+
 
   constructor(
     private cardService: CardService,
@@ -58,9 +60,46 @@ export class GameBoardPage implements OnInit {
     this.cardService.getCards().subscribe(cards => {
       this.opponentDeck = this.cardService.getNormalMonsters(cards);
       this.drawInitialCards();
+      this.applyRandomBoost();
     });
   }
   
+  applyRandomBoost() {
+  const attributes = ['Wind', 'Dark', 'Fire', 'Water', 'Earth', 'Light']; // Define the card attributes
+  const stats = ['atk', 'def']; // Define the stats that can be boosted (ATK or DEF)
+  
+  const randomAttribute = attributes[Math.floor(Math.random() * attributes.length)];
+  const randomStat = stats[Math.floor(Math.random() * stats.length)]; // Randomly choose ATK or DEF
+  const randomPercentage = Math.floor(Math.random() * 21) + 10; // Random boost between 10% and 30%
+
+  this.randomBoost = { attribute: randomAttribute, stat: randomStat, percentage: randomPercentage };
+
+  console.log(`Random Boost: ${randomAttribute} ${randomStat.toUpperCase()} +${randomPercentage}%`);
+
+  // Apply the boost and mark boosted cards in the player's deck
+  this.playerDeck.forEach(card => {
+    if (card.attribute === randomAttribute) {
+      card[randomStat] = Math.floor(card[randomStat] * (1 + randomPercentage / 100)); // Boost the selected stat
+      card.isBoosted = true; // Mark the card as boosted
+    } else {
+      card.isBoosted = false; // Ensure other cards are not marked
+    }
+  });
+
+  // Apply the boost and mark boosted cards in the opponent's deck
+  this.opponentDeck.forEach(card => {
+    if (card.attribute === randomAttribute) {
+      card[randomStat] = Math.floor(card[randomStat] * (1 + randomPercentage / 100)); // Boost the selected stat
+      card.isBoosted = true; // Mark the card as boosted
+    } else {
+      card.isBoosted = false; // Ensure other cards are not marked
+    }
+  });
+}
+
+  initializeGame() {
+    console.log('Game initialized with random boost:', this.randomBoost);
+  }
   
   drawInitialCards() {
     this.playerHand = this.drawCards(this.playerDeck, 5);

@@ -7,7 +7,7 @@
   .sidebar {
     width: 250px;
     height: 100vh;
-
+    
     .game-controls button {
       background-color: #0066ff;
       color: white;
@@ -21,6 +21,15 @@
       &:hover{
         background-color: #0044cc;
       }
+    }
+    
+    .boost-info {
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      z-index: 1000;
     }
 
   }
@@ -152,4 +161,10 @@ ion-content {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transform-origin: center center;
+}
+
+.monster-card.boosted-card {
+  outline: 3px solid gold; /* Highlight with a gold border */
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); /* Add a glowing effect */
+  transition: outline 0.3s ease, box-shadow 0.3s ease;
 }
