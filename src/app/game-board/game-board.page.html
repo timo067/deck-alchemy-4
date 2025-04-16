@@ -87,7 +87,7 @@
 
       <!-- Player's Field -->
       <div class="game-area">
-        <h2>Your Field</h2>
+        <!-- <h2>Your Field</h2> -->
         <div class="monster-cards">
           <div *ngFor="let card of playerMonsterCards" class="monster-card" [attr.data-card-id]="card.id" [ngClass]="{ 'boosted-card': card.isBoosted }">
             <ion-thumbnail>
@@ -102,16 +102,15 @@
 
       <!-- Player's Hand -->
       <div class="game-area">
-        <h2>Your Hand</h2>
+        <!-- <h2>Your Hand</h2> -->
         <div class="monster-cards">
           <div *ngFor="let card of playerHand" class="monster-card" [ngClass]="{ 'boosted-card': card.isBoosted }">
-            <ion-thumbnail slot="start">
+            
               <img
                 [src]="card?.card_images[0]?.image_url"
                 alt="{{ card?.name }}"
               />
-            </ion-thumbnail>
-            <ion-label>{{ card?.name }}</ion-label>
+            
             <p *ngIf="card.isBoosted">🔥 Boosted!</p>
             <ion-button (click)="playCard(card)">Play</ion-button>
           </div>
