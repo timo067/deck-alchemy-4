@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CardService } from '../services/card.service';
 import { Renderer2 } from '@angular/core';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-game-board',
@@ -166,49 +167,53 @@ export class GameBoardPage implements OnInit {
   }
 }
 
-  summonCard(card: any, isPlayer: boolean) {
-    // Create the summoned card element
-    const summonedCard = this.renderer.createElement('div');
-    this.renderer.addClass(summonedCard, 'summoned-card');
+summonCard(card: any, isPlayer: boolean) {
+  // Create the summoned card element
+  const summonedCard = this.renderer.createElement('div');
+  this.renderer.addClass(summonedCard, 'summoned-card');
 
-    // Set the card's image as the background
-    this.renderer.setStyle(
-      summonedCard,
-      'background-image',
-      `url(${card.card_images[0]?.image_url || 'assets/images/default-card.jpg'})`
-    );
+  // Set the card's image as the background
+  this.renderer.setStyle(
+    summonedCard,
+    'background-image',
+    `url(${card.card_images[0]?.image_url || 'assets/images/default-card.jpg'})`
+  );
 
-    // Set initial position (off-screen)
-    this.renderer.setStyle(summonedCard, 'position', 'fixed');
-    this.renderer.setStyle(summonedCard, 'top', isPlayer ? '100vh' : '-150px'); // Player summons from bottom, opponent from top
-    this.renderer.setStyle(summonedCard, 'left', '50%');
-    this.renderer.setStyle(summonedCard, 'transform', 'translateX(-50%)');
-    this.renderer.setStyle(summonedCard, 'width', '120px');
-    this.renderer.setStyle(summonedCard, 'height', '180px');
-    this.renderer.setStyle(summonedCard, 'background-size', 'cover');
-    this.renderer.setStyle(summonedCard, 'z-index', '1000');
-    this.renderer.setStyle(summonedCard, 'transition', 'top 0.5s ease-out');
+  // Set initial position (off-screen)
+  this.renderer.setStyle(summonedCard, 'position', 'fixed');
+  this.renderer.setStyle(summonedCard, 'top', isPlayer ? '100vh' : '-150px'); // Player summons from bottom, opponent from top
+  this.renderer.setStyle(summonedCard, 'left', '50%');
+  this.renderer.setStyle(summonedCard, 'transform', 'translateX(-50%)');
+  this.renderer.setStyle(summonedCard, 'width', '120px');
+  this.renderer.setStyle(summonedCard, 'height', '180px');
+  this.renderer.setStyle(summonedCard, 'background-size', 'cover');
+  this.renderer.setStyle(summonedCard, 'z-index', '1000');
 
-    // Append the summoned card to the body
-    this.renderer.appendChild(document.body, summonedCard);
+  // Append the summoned card to the body
+  this.renderer.appendChild(document.body, summonedCard);
 
-    // Animate the card to its final position
-    setTimeout(() => {
-      this.renderer.setStyle(summonedCard, 'top', isPlayer ? '50vh' : '30vh'); // Adjust based on player or opponent
-    }, 0);
+  // Use GSAP to animate the card to its final position
+  gsap.fromTo(
+    summonedCard,
+    { top: isPlayer ? '100vh' : '-150px' }, // Start position
+    {
+      top: isPlayer ? '50vh' : '30vh', // End position
+      duration: 0.5, // Animation duration
+      ease: 'power2.out', // Easing function
+      onComplete: () => {
+        // Remove the summoned card element after the animation
+        this.renderer.removeChild(document.body, summonedCard);
 
-    // Remove the summoned card element after the animation
-    setTimeout(() => {
-      this.renderer.removeChild(document.body, summonedCard);
-
-      // Add the card to the field
-      if (isPlayer) {
-        this.playerMonsterCards.push(card);
-      } else {
-        this.opponentMonsterCards.push(card);
-      }
-    }, 500); // Match the animation duration
-  }
+        // Add the card to the field
+        if (isPlayer) {
+          this.playerMonsterCards.push(card);
+        } else {
+          this.opponentMonsterCards.push(card);
+        }
+      },
+    }
+  );
+}
 
   playCard(card: any) {
     if (this.phase === 'main') {
@@ -250,6 +255,7 @@ export class GameBoardPage implements OnInit {
     attacker.classList.add('attacking-card');
     target.classList.add('targeted-card');
   
+    // Clone the card for animation
     this.clonedCard = {
       top: attackerRect.top,
       left: attackerRect.left,
@@ -257,37 +263,63 @@ export class GameBoardPage implements OnInit {
       image: this.selectedCard.card_images[0]?.image_url ?? 'assets/images/default-card.jpg',
     };
   
-    attacker.style.visibility = 'hidden';
-    attacker.classList.remove('selected-card');
+    // Use GSAP to animate the cloned card
+    const clonedElement = this.renderer.createElement('div');
+    this.renderer.setStyle(clonedElement, 'position', 'fixed');
+    this.renderer.setStyle(clonedElement, 'top', `${attackerRect.top}px`);
+    this.renderer.setStyle(clonedElement, 'left', `${attackerRect.left}px`);
+    this.renderer.setStyle(clonedElement, 'width', '120px');
+    this.renderer.setStyle(clonedElement, 'height', '180px');
+    this.renderer.setStyle(clonedElement, 'background-image', `url(${this.clonedCard.image})`);
+    this.renderer.setStyle(clonedElement, 'background-size', 'cover');
+    this.renderer.setStyle(clonedElement, 'z-index', '1000');
+    this.renderer.appendChild(document.body, clonedElement);
   
-    //setTimeout(() => {
-      
-    //}, 10);
+    gsap.to(clonedElement, {
+      x: deltaX,
+      y: deltaY,
+      scale: 1.2,
+      duration: 0.6,
+      ease: 'power2.out',
+      onComplete: () => {
+        // Remove the cloned card after the animation
+        this.renderer.removeChild(document.body, clonedElement);
   
-    setTimeout(() => {
-      this.clonedCard = null;
-      this.transformStyle = '';
-      attacker.style.visibility = 'visible';
+        // Trigger explosion effect
+        this.triggerExplosion(targetRect);
   
-      // Remove CSS classes after the attack
-      attacker.classList.remove('attacking-card');
-      target.classList.remove('targeted-card');
-  
-      // Trigger explosion effect before attack logic
-      this.triggerExplosion(targetRect);
-      this.performAttack();
-    }, 600); // Match the animation duration
+        // Perform the attack logic
+        this.performAttack();
+      },
+    });
   }
   
   triggerExplosion(targetRect: DOMRect) {
-    this.explosion = {
-      top: targetRect.top,
-      left: targetRect.left,
-    };
+    const explosionElement = this.renderer.createElement('div');
+    this.renderer.addClass(explosionElement, 'explosion');
+    this.renderer.setStyle(explosionElement, 'position', 'fixed');
+    this.renderer.setStyle(explosionElement, 'top', `${targetRect.top}px`);
+    this.renderer.setStyle(explosionElement, 'left', `${targetRect.left}px`);
+    this.renderer.setStyle(explosionElement, 'width', '120px');
+    this.renderer.setStyle(explosionElement, 'height', '120px');
+    this.renderer.setStyle(explosionElement, 'background-image', 'url(/assets/images/explosion.png)');
+    this.renderer.setStyle(explosionElement, 'background-size', 'contain');
+    this.renderer.setStyle(explosionElement, 'z-index', '1000');
+    this.renderer.appendChild(document.body, explosionElement);
   
-    setTimeout(() => {
-      this.explosion = null;
-    }, 600); // Match with fadeOut duration in SCSS
+    gsap.fromTo(
+      explosionElement,
+      { scale: 1, opacity: 1 },
+      {
+        scale: 1.6,
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        onComplete: () => {
+          this.renderer.removeChild(document.body, explosionElement);
+        },
+      }
+    );
   }  
 
   performAttack() {
