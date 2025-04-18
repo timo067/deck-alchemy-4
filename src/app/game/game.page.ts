@@ -53,8 +53,6 @@ export class GamePage implements OnInit {
       // Save the enemy deck to localStorage for persistence
       localStorage.setItem('enemyDeck', JSON.stringify(this.enemyDeck));
     } catch (error) {
-      console.error('Error initializing enemy deck:', error);
-      alert('Failed to initialize enemy deck.');
     }
   }
 

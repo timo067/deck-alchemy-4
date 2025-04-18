@@ -15,10 +15,29 @@ export class DefaultPage implements OnInit {
 
   ngOnInit() {
     this.loggedInAccounts = this.authService.getLoggedInAccounts();
+    this.restoreLoggedInAccounts();
   }
 
-  navigateToDeckEditor() {
-    this.router.navigate(['/deck-editor']);
+      // Restore logged-in accounts from localStorage
+  restoreLoggedInAccounts(): void {
+    this.loggedInAccounts = this.authService.getLoggedInAccounts();
+    console.log('Logged-in accounts restored:', this.loggedInAccounts);
+  }
+
+  // Add a new account (for demonstration purposes)
+  addAccount(account: string): void {
+    this.loggedInAccounts.push(account);
+    this.saveLoggedInAccounts(); // Save to localStorage
+  }
+
+  // Save logged-in accounts to localStorage
+  saveLoggedInAccounts(): void {
+    localStorage.setItem('loggedInAccounts', JSON.stringify(this.loggedInAccounts));
+    console.log('Logged-in accounts saved:', this.loggedInAccounts);
+  }
+
+  navigateToDeckList() {
+    this.router.navigate(['/deck-list']);
   }
 
   navigateToSimilarGame() {

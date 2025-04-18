@@ -1,9 +1,51 @@
+.deck-item {
+  margin-bottom: 12px; /* Adjust spacing between items */
+  padding: 0; /* Remove extra padding */
+
+  ion-item {
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #FFD700;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+    }
+
+    ion-label {
+      color: #FFD700;
+    }
+
+    .deck-name {
+      font-size: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+      text-shadow: 0 0 5px rgba(255, 215, 0, 0.6);
+      margin: 0;
+    }
+
+    ion-button {
+      margin-left: 8px;
+    }
+
+    ion-button[color="danger"] {
+      --background: rgba(255, 0, 0, 0.8);
+      --color: #fff;
+    }
+  }
+}
+
 .deck-editor-container {
   background: rgba(20, 20, 20, 0.95); /* Darkened overlay */
   padding: 20px;
   color: #FFD700; /* Gold text */
   text-align: center;
   animation: fadeIn 0.5s ease-in-out;
+  border: 2px solid #FFD700; /* Ensure border matches the yellow line */
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); /* Golden glow */
+  overflow: hidden; /* Prevent content from overflowing */
 }
 
 /* === BUTTONS === */
@@ -91,6 +133,12 @@ ion-card-title {
   font-size: 18px;
   color: #FFD700;
   text-transform: uppercase;
+}
+
+ion-list:empty {
+  padding: 0;
+  background: transparent;
+  border: none;
 }
 
 /* === FADE-IN EFFECT === */

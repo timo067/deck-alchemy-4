@@ -1,0 +1,38 @@
+<ion-content>
+  <ion-grid class="deck-list">
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" size-md="8">
+        <!-- Home and Card Search Buttons -->
+    <div class="button-container">
+      <ion-button expand="full" (click)="goHome()">Home</ion-button>
+      <ion-button expand="full" (click)="goToDeckEditor()">Go to Deck Editor</ion-button>
+      <ion-button expand="full" (click)="goToCardSearch()">Go to Card Search</ion-button>
+    </div>
+        <h1 class="deck-title">Your Decks</h1>
+
+        <!-- Create Deck Section -->
+        <ion-item class="deck-input-item">
+          <ion-input
+            [(ngModel)]="newDeckName"
+            placeholder="Enter deck name"
+            class="deck-input">
+          </ion-input>
+          <ion-button slot="end" (click)="createDeck(newDeckName)">Create Deck</ion-button>
+        </ion-item>
+
+        <!-- Deck Items List -->
+        <ion-list>
+          <ion-item-sliding *ngFor="let deck of decks" class="deck-item">
+            <ion-item clas lines="none">
+              <ion-label>
+                <h3 class="deck-name">{{ deck.name }}</h3>
+              </ion-label>
+              <ion-button fill="outline" size="small" (click)="editDeck(deck)">Edit</ion-button>
+              <ion-button color="danger" size="small" (click)="deleteDeck(deck)">Delete</ion-button>
+            </ion-item>
+          </ion-item-sliding>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -1,0 +1,127 @@
+.deck-list {
+  padding: 20px;
+  animation: fadeIn 0.5s ease-in-out;
+  text-align: center;
+}
+
+.deck-title {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #FFD700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+ion-button {
+  --background: linear-gradient(45deg, #8B0000, #FF4500) !important;
+  --color: #FFD700 !important;
+  --border-radius: 6px;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+ion-button:hover {
+  transform: scale(1.05);
+}
+
+ion-button[color="primary"] {
+  --background: linear-gradient(45deg, #1E90FF, #00BFFF);
+  --color: #FFD700;
+}
+
+ion-button[color="secondary"] {
+  --background: linear-gradient(45deg, #8A2BE2, #9370DB);
+  --color: #FFD700;
+}
+
+ion-button[color="tertiary"] {
+  --background: linear-gradient(45deg, #32CD32, #98FB98);
+  --color: #FFD700;
+}
+
+.deck-input-item {
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+
+  ion-input {
+    color: #FFD700;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  ion-button {
+    --background: linear-gradient(45deg, #8B0000, #FF4500);
+    --color: #FFD700;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  }
+}
+
+.deck-item {
+  margin-bottom: 12px; /* Adjust spacing between items */
+  padding: 0; /* Remove extra padding */
+
+  ion-item {
+    border: 2px solid #FFD700;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+    }
+
+    ion-label {
+      color: #FFD700;
+    }
+
+    .deck-name {
+      font-size: 18px;
+      font-weight: bold;
+      text-transform: uppercase;
+      text-shadow: 0 0 5px rgba(255, 215, 0, 0.6);
+      margin: 0;
+    }
+
+    ion-button {
+      margin-left: 8px;
+    }
+
+    ion-button[color="danger"] {
+      --background: rgba(255, 0, 0, 0.8);
+      --color: #fff;
+    }
+  }
+}
+
+ion-list.list-md {
+  background: transparent; /* Remove background */
+  padding: 0; /* Remove padding */
+  border: none; /* Remove any borders */
+}
+
+.deck-list ion-list.list-md {
+  background: transparent;
+  padding: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

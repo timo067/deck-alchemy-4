@@ -3,14 +3,8 @@
     <!-- Home and Card Search Buttons -->
     <div class="button-container">
       <ion-button expand="full" color="primary" (click)="goHome()">Home</ion-button>
-      <ion-button expand="full" color="secondary" (click)="goToCardSearch()">Go to Card Search</ion-button>
+      <ion-button expand="full" color="secondary" (click)="goToDeckList()">Go to Deck List</ion-button>
     </div>
-
-  <!-- Create Deck Section -->
-  <ion-item>
-    <ion-input [(ngModel)]="newDeckName" placeholder="Enter deck name"></ion-input>
-    <ion-button (click)="createDeck()">Create Deck</ion-button>
-  </ion-item>
 
   <!-- Deck List -->
   <ion-list>

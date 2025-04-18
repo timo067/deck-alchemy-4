@@ -50,8 +50,8 @@ form {
 
 ion-item {
   --background: transparent;
-  --border-color: #FFD700;
-  border-bottom: 2px solid #FFD700;
+  --border-color: transparent; /* Remove default border */
+  border-bottom: 2px solid #FFD700; /* Custom golden border */
   width: 100%;
 }
 

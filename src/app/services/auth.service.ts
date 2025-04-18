@@ -18,6 +18,18 @@ export class AuthService {
     this.firestore = getFirestore(getApp());
   }
 
+  addAccount(account: string): void {
+    if (!this.loggedInAccounts.includes(account)) {
+      this.loggedInAccounts.push(account);
+      this.saveLoggedInAccounts(); // Save to localStorage
+    }
+  }
+  
+  // Save logged-in accounts to localStorage
+  private saveLoggedInAccounts(): void {
+    localStorage.setItem('loggedInAccounts', JSON.stringify(this.loggedInAccounts));
+  }
+
   async register(email: string, password: string, username: string) {
     const result = await this.afAuth.createUserWithEmailAndPassword(email, password);
     if (result.user) {
@@ -30,13 +42,9 @@ export class AuthService {
   async login(email: string, password: string) {
     const result = await this.afAuth.signInWithEmailAndPassword(email, password);
     if (result.user) {
-      const token = await result.user.getIdToken();
-      localStorage.setItem('authToken', token); // Store token in localStorage
-      console.log('Auth token stored in localStorage.');
-
-      const username = await this.getUsername(); // Use existing function
+      const username = await this.getUsername();
       if (username) {
-        this.addLoggedInUser(username);
+        this.addAccount(username); // Add the logged-in user to the accounts list
       }
     }
     return result;
@@ -88,7 +96,8 @@ export class AuthService {
   }
 
   getLoggedInAccounts(): string[] {
-    return this.loggedInAccounts;
+    const accounts = localStorage.getItem('loggedInAccounts');
+    return accounts ? JSON.parse(accounts) : [];
   }
 
   async validateToken(): Promise<boolean> {

@@ -35,6 +35,10 @@ const routes: Routes = [
     path: 'game-board',
     loadChildren: () => import('./game-board/game-board.module').then( m => m.GameBoardPageModule)
   },
+  {
+    path: 'deck-list',
+    loadChildren: () => import('./deck-list/deck-list.module').then( m => m.DeckListPageModule)
+  },
 ];
 
 @NgModule({

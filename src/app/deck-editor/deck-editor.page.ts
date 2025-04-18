@@ -36,24 +36,76 @@ export class DeckEditorPage {
     private deckService: DeckService  // Inject DeckService
   ) {}
 
-  // Create a new deck
-  async createDeck(): Promise<void> {
-    if (!this.newDeckName.trim()) {
-      alert('Please enter a deck name.');
+  ngOnInit(): void {
+    this.restoreState(); // Restore state on initialization
+  }
+  
+  // Restore state from localStorage or Firestore
+  restoreState(): void {
+    // Restore decks from localStorage
+    const savedDecks = localStorage.getItem('decks');
+    if (savedDecks) {
+      this.decks = JSON.parse(savedDecks);
+      console.log('Decks restored from localStorage:', this.decks);
+    } else {
+      this.loadDecks(); // Load from Firestore if not in localStorage
+    }
+  
+    // Restore selected deck from localStorage
+    const savedSelectedDeck = localStorage.getItem('selectedDeck');
+    if (savedSelectedDeck) {
+      this.selectedDeck = JSON.parse(savedSelectedDeck);
+      console.log('Selected deck restored from localStorage:', this.selectedDeck);
+    }
+  }
+  
+  // Load decks from Firestore
+  async loadDecks(): Promise<void> {
+    try {
+      const decks = await this.deckService.getDecks().toPromise();
+      this.decks = decks || [];
+      console.log('Decks loaded from Firestore:', this.decks);
+  
+      // Save the decks to localStorage for persistence
+      localStorage.setItem('decks', JSON.stringify(this.decks));
+    } catch (error) {
+      console.error('Error loading decks:', error);
+      alert('Failed to load decks. Please ensure you are logged in.');
+    }
+  }
+
+    // Save the selected deck to localStorage
+    saveSelectedDeck(): void {
+      if (this.selectedDeck) {
+        localStorage.setItem('selectedDeck', JSON.stringify(this.selectedDeck));
+        console.log('Selected deck saved to localStorage:', this.selectedDeck);
+      }
+    }
+
+    // Save all decks to localStorage
+    saveDecks(): void {
+      localStorage.setItem('decks', JSON.stringify(this.decks));
+      console.log('Decks saved to localStorage:', this.decks);
+    }
+
+      // Create a new deck
+  createDeck(deckName: string): void {
+    if (!deckName.trim()) {
+      alert('Please enter a valid deck name.');
       return;
     }
 
-    try {
-      await this.deckService.createDeck(this.newDeckName);
-      
-      const newDeck = { name: this.newDeckName, cards: [] };
-      this.decks.push(newDeck);
-      this.selectedDeck = newDeck;
-      this.newDeckName = '';  // Clear input
-    } catch (error) {
-      console.error('Error creating deck:', error);
-      alert('Error creating deck.');
+    // Check if a deck with the same name already exists
+    const existingDeck = this.decks.find((deck) => deck.name.toLowerCase() === deckName.toLowerCase());
+    if (existingDeck) {
+      alert(`A deck with the name "${deckName}" already exists. Please choose a different name.`);
+      return;
     }
+
+    const newDeck: Deck = { name: deckName, cards: [] };
+    this.decks.push(newDeck);
+    this.saveDecks(); // Save to localStorage
+    console.log('New deck created:', newDeck);
   }
 
   // Select a deck and display its cards
@@ -110,46 +162,47 @@ export class DeckEditorPage {
     });
   }
 
-  // Add card to deck (max 3 copies)
+      // Add card to deck (max 3 copies)
   addToDeck(card: Card): void {
     if (!this.selectedDeck) {
       alert('Please select a deck first.');
       return;
     }
-  
+
     const cardCount = this.selectedDeck.cards.filter((c: Card) => c.id === card.id).length;
-  
+
     if (cardCount < 3) {
       this.selectedDeck.cards.push(card);
-      this.errorMessage = ''; 
-      this.deckService.updateDeck(this.selectedDeck, card);  // Update Firestore
+      this.deckService.updateDeck(this.selectedDeck, card); // Update Firestore
     } else {
-      this.errorMessage = `You can only add "${card.name}" up to 3 times.`;
+      alert(`You can only add "${card.name}" up to 3 times.`);
     }
   }
-  
+
   // Remove card from deck
   removeFromDeck(card: Card): void {
     if (this.selectedDeck) {
       const index = this.selectedDeck.cards.findIndex((c: Card) => c.id === card.id);
       if (index !== -1) {
         this.selectedDeck.cards.splice(index, 1);
-        this.deckService.updateDeck(this.selectedDeck, card, true);  // Update Firestore
+        this.deckService.updateDeck(this.selectedDeck, card, true); // Update Firestore
       }
     }
   }
 
-  // Delete deck
-  async deleteDeck(deck: Deck): Promise<void> {
-    const index = this.decks.indexOf(deck);
-    if (index !== -1) {
-      this.decks.splice(index, 1);
+    // Delete a deck
+  deleteDeck(deck: Deck): void {
+    this.decks = this.decks.filter((d) => d.name !== deck.name);
+    this.saveDecks(); // Save to localStorage
+    console.log('Deck deleted:', deck);
+  }
 
-      if (this.selectedDeck === deck) {
-        this.selectedDeck = null;
-      }
-
-      await this.deckService.deleteDeck(deck.name);
+  // Save changes to the selected deck
+  saveDeck(): void {
+    if (this.selectedDeck) {
+      this.deckService.updateDeck(this.selectedDeck, null); // Update Firestore
+      alert('Deck saved successfully!');
+      this.router.navigate(['/deck-list']);
     }
   }
 
@@ -160,5 +213,9 @@ export class DeckEditorPage {
 
   goToCardSearch(): void {
     this.router.navigate(['/card-search']);
+  }
+
+  goToDeckList(): void {
+    this.router.navigate(['/deck-list']);
   }
 }
