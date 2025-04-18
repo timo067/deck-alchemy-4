@@ -201,4 +201,9 @@ export class GamePage implements OnInit {
       }
     });
   }
+
+  // Go to home page
+  goHome(): void {
+    this.router.navigate(['/default']);
+  }
 }
