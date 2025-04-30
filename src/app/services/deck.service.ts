@@ -103,35 +103,25 @@ export class DeckService {
   
 
   // Update deck by adding or removing cards
-async updateDeck(deck: any, card: any, remove = false): Promise<void> {
-  const deckRef = doc(this.firestore, 'decks', deck.name);
-
-  try {
-    if (remove) {
-      // Remove card from the deck
-      await updateDoc(deckRef, {
-        cards: arrayRemove(card),
-      });
-    } else {
-      // Add card to the deck
-      await updateDoc(deckRef, {
-        cards: arrayUnion(card),
-      });
+  async updateDeck(deck: any, card: any | null, isRemove: boolean = false): Promise<void> {
+    try {
+      const userId = await this.authService.getUserId();
+      if (!userId) {
+        throw new Error('User is not authenticated.');
+      }
+  
+      const deckRef = doc(this.firestore, 'decks', deck.name); // Reference to the deck in Firestore
+      const deckDoc = await getDoc(deckRef);
+  
+      if (deckDoc.exists()) {
+        const updatedDeck = { ...deckDoc.data(), cards: deck.cards };
+        await setDoc(deckRef, updatedDeck); // Update the deck in Firestore
+        console.log(`Deck "${deck.name}" updated in Firestore.`);
+      } else {
+        throw new Error('Deck does not exist in Firestore.');
+      }
+    } catch (error) {
+      console.error('Error updating deck:', error);
     }
-
-    // Update the deck in the BehaviorSubject
-    const currentDecks = this.decksSubject.value.map((d) =>
-      d.name === deck.name
-        ? {
-            ...d,
-            cards: remove ? d.cards.filter((c) => c.id !== card.id) : [...d.cards, card],
-          }
-        : d
-    );
-    this.decksSubject.next(currentDecks);
-  } catch (error) {
-    console.error('Error updating deck:', error);
-    throw new Error('Failed to update deck.');
   }
- }
 }

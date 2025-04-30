@@ -163,21 +163,24 @@ export class DeckEditorPage {
   }
 
       // Add card to deck (max 3 copies)
-  addToDeck(card: Card): void {
-    if (!this.selectedDeck) {
-      alert('Please select a deck first.');
-      return;
-    }
-
-    const cardCount = this.selectedDeck.cards.filter((c: Card) => c.id === card.id).length;
-
-    if (cardCount < 3) {
-      this.selectedDeck.cards.push(card);
-      this.deckService.updateDeck(this.selectedDeck, card); // Update Firestore
-    } else {
-      alert(`You can only add "${card.name}" up to 3 times.`);
-    }
-  }
+      addToDeck(card: Card): void {
+        if (!this.selectedDeck) {
+          alert('Please select a deck first.');
+          return;
+        }
+      
+        const cardCount = this.selectedDeck.cards.filter((c: Card) => c.id === card.id).length;
+      
+        if (cardCount < 3) {
+          this.selectedDeck.cards.push(card);
+          this.saveSelectedDeck(); // Save the updated selected deck to localStorage
+          this.saveDecks(); // Save all decks to localStorage
+          this.deckService.updateDeck(this.selectedDeck, card); // Update Firestore
+          console.log(`Card "${card.name}" added to deck "${this.selectedDeck.name}".`);
+        } else {
+          alert(`You can only add "${card.name}" up to 3 times.`);
+        }
+      }
 
   // Remove card from deck
   removeFromDeck(card: Card): void {
@@ -185,7 +188,10 @@ export class DeckEditorPage {
       const index = this.selectedDeck.cards.findIndex((c: Card) => c.id === card.id);
       if (index !== -1) {
         this.selectedDeck.cards.splice(index, 1);
+        this.saveSelectedDeck(); // Save the updated selected deck to localStorage
+        this.saveDecks(); // Save all decks to localStorage
         this.deckService.updateDeck(this.selectedDeck, card, true); // Update Firestore
+        console.log(`Card "${card.name}" removed from deck "${this.selectedDeck.name}".`);
       }
     }
   }
