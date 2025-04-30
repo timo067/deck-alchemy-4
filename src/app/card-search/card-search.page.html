@@ -1,21 +1,25 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Yu-Gi-Oh! Card Search</ion-title>
+    <!-- Back Arrow -->
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="default"></ion-back-button>
+    </ion-buttons>
+    <ion-title>The Card Chronicles</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- Home and Card Search Buttons Wrapper -->
+  <!-- Card Search Content -->
   <ion-row>
     <ion-col size="6">
-      <ion-button expand="full" (click)="goHome()">Home</ion-button>
-    </ion-col>
-    <ion-col size="6">
-      <ion-button expand="full" (click)="goToDeckEditor()">Go to Deck Editor</ion-button>
+      <h2>The Card Chronicles</h2>
     </ion-col>
   </ion-row>
 
-  <h2>Yu-Gi-Oh! Card Search</h2>
+  <!-- Toggle Filters Button -->
+  <ion-button expand="full" (click)="toggleFilters()">
+    {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
+  </ion-button>
 
   <ion-item>
     <ion-input
@@ -26,62 +30,35 @@
     <ion-button (click)="searchCards()">Search</ion-button>
   </ion-item>
 
-  <!-- Filter Options -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Filters</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-item>
-        <ion-input
-          type="number"
-          [(ngModel)]="filters.atk"
-          placeholder="Min ATK"
-        ></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input
-          type="number"
-          [(ngModel)]="filters.def"
-          placeholder="Min DEF"
-        ></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input
-          type="number"
-          [(ngModel)]="filters.level"
-          placeholder="Level"
-        ></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input
-          [(ngModel)]="filters.type"
-          placeholder="Type"
-        ></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input
-          [(ngModel)]="filters.race"
-          placeholder="Race"
-        ></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input
-          [(ngModel)]="filters.archetype"
-          placeholder="Archetype"
-        ></ion-input>
-      </ion-item>
-
-      <ion-row>
-        <ion-col size="6">
-          <ion-button expand="full" (click)="applyFilters()">Apply Filters</ion-button>
-        </ion-col>
-        <ion-col size="6">
-          <ion-button expand="full" (click)="resetFilters()">Reset</ion-button>
-        </ion-col>
-      </ion-row>
-    </ion-card-content>
-  </ion-card>
+  <!-- Filters Section -->
+  <div *ngIf="showFilters">
+    <ion-item>
+      <ion-label position="floating">Minimum ATK</ion-label>
+      <ion-input type="number" [(ngModel)]="filters.atk"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Minimum DEF</ion-label>
+      <ion-input type="number" [(ngModel)]="filters.def"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Level</ion-label>
+      <ion-input type="number" [(ngModel)]="filters.level"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Type</ion-label>
+      <ion-input [(ngModel)]="filters.type"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Race</ion-label>
+      <ion-input [(ngModel)]="filters.race"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Archetype</ion-label>
+      <ion-input [(ngModel)]="filters.archetype"></ion-input>
+    </ion-item>
+    <ion-button expand="full" (click)="applyFilters()">Apply Filters</ion-button>
+    <ion-button expand="full" color="medium" (click)="resetFilters()">Reset Filters</ion-button>
+  </div>
 
   <ion-text color="danger" *ngIf="error">
     <p>{{ error }}</p>

@@ -3,11 +3,15 @@
     <ion-row class="ion-justify-content-center">
       <ion-col size="12" size-md="8">
         <!-- Home and Card Search Buttons -->
-    <div class="button-container">
-      <ion-button expand="full" (click)="goHome()">Home</ion-button>
-      <ion-button expand="full" (click)="goToDeckEditor()">Go to Deck Editor</ion-button>
-      <ion-button expand="full" (click)="goToCardSearch()">Go to Card Search</ion-button>
-    </div>
+        <ion-header>
+          <ion-toolbar>
+            <!-- Back Arrow -->
+            <ion-buttons slot="start">
+              <ion-back-button defaultHref="default"></ion-back-button>
+            </ion-buttons>
+            <ion-title>Deck List</ion-title>
+          </ion-toolbar>
+        </ion-header>
         <h1 class="deck-title">Your Decks</h1>
 
         <!-- Create Deck Section -->
@@ -27,6 +31,7 @@
               <ion-label>
                 <h3 class="deck-name">{{ deck.name }}</h3>
               </ion-label>
+              <ion-button color="primary" (click)="setActiveDeck(deck)">Set as Active Deck</ion-button>
               <ion-button fill="outline" size="small" (click)="editDeck(deck)">Edit</ion-button>
               <ion-button color="danger" size="small" (click)="deleteDeck(deck)">Delete</ion-button>
             </ion-item>

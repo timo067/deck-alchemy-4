@@ -1,10 +1,14 @@
 <ion-content>
   <div class="deck-editor-container">
-    <!-- Home and Card Search Buttons -->
-    <div class="button-container">
-      <ion-button expand="full" color="primary" (click)="goHome()">Home</ion-button>
-      <ion-button expand="full" color="secondary" (click)="goToDeckList()">Go to Deck List</ion-button>
-    </div>
+    <ion-header>
+      <ion-toolbar>
+        <!-- Back Arrow -->
+        <ion-buttons slot="start">
+          <ion-back-button defaultHref="default"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Deck Editor</ion-title>
+      </ion-toolbar>
+    </ion-header>
 
   <!-- Deck List -->
   <ion-list>

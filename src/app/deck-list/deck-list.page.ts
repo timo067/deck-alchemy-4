@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { DeckService } from '../services/deck.service';
 
-interface Deck {
+export interface Deck {
+  id: string; // Unique identifier for the deck
   name: string;
   cards: any[];
 }
@@ -37,9 +38,12 @@ export class DeckListPage {
   // Load decks from the DeckService
   loadDecks(): void {
     this.deckService.getDecks().subscribe((decks) => {
-      this.decks = decks;
+      this.decks = decks.map((deck: any) => ({
+        ...deck,
+        id: deck.id || '' // Ensure each deck has an 'id' property
+      }));
       console.log('Decks loaded from Firestore:', this.decks);
-
+  
       // Save the decks to localStorage for persistence
       localStorage.setItem('decks', JSON.stringify(this.decks));
     });
@@ -65,7 +69,10 @@ export class DeckListPage {
       return;
     }
 
-    const newDeck: Deck = { name: deckName, cards: [] };
+    const newDeck: Deck = {
+      name: deckName, cards: [],
+      id: ''
+    };
     this.decks.push(newDeck);
     this.saveDecks(); // Save to localStorage
     console.log('New deck created:', newDeck);
@@ -77,16 +84,25 @@ export class DeckListPage {
   }
 
   // Delete a deck
-  deleteDeck(deck: Deck): void {
-    this.deckService.deleteDeck(deck.name).then(() => {
+  deleteDeck(deck: any): void {
+    if (!deck.id) {
+      alert('Deck ID is missing. Cannot delete this deck.');
+      return;
+    }
+  
+    this.deckService.deleteDeck(deck.id).then(() => {
       // Remove the deck locally
-      this.decks = this.decks.filter((d) => d.name !== deck.name);
-      localStorage.setItem('decks', JSON.stringify(this.decks)); // Update localStorage
+      this.decks = this.decks.filter((d) => d.id !== deck.id);
       console.log('Deck deleted:', deck);
     }).catch((error) => {
       console.error('Failed to delete deck:', error);
       alert(error.message || 'Failed to delete the deck. Please try again.');
     });
+  }
+
+  setActiveDeck(deck: any): void {
+    localStorage.setItem('activeDeck', JSON.stringify(deck)); // Save the active deck to localStorage
+    alert(`Deck "${deck.name}" is now set as the active deck for the game.`);
   }
 
   // Navigate to other pages

@@ -31,6 +31,7 @@ export class CardSearchPage {
   searchTerm: string = '';
   loading: boolean = false;
   error: string | null = null;
+  showFilters: boolean = false; // Property to toggle filter visibility
   filters = {
     atk: null as number | null,
     def: null as number | null,
@@ -41,6 +42,10 @@ export class CardSearchPage {
   };
 
   constructor(private http: HttpClient, private router: Router) {}
+
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters; // Toggle the visibility of the filter section
+  }
 
   searchCards(): void {
     if (!this.searchTerm.trim()) {

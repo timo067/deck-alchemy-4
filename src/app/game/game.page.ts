@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
   standalone: false
 })
 export class GamePage implements OnInit {
+[x: string]: any;
   playerDeck: any = { name: '', cards: [] };
   enemyDeck: any = { name: 'Enemy Deck', cards: [] }; // Automatically created enemy deck
   selectedBackground: string = 'Blue Eyes White Dragon.jpg'; // Default background
@@ -25,7 +26,14 @@ export class GamePage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.restoreState(); // Restore state from localStorage
+    const savedActiveDeck = localStorage.getItem('activeDeck');
+    if (savedActiveDeck) {
+      this.playerDeck = JSON.parse(savedActiveDeck); // Set the active deck as the player deck
+      console.log('Active deck loaded for the game:', this.playerDeck);
+    } else {
+      alert('No active deck is set. Please select a deck in the Deck List page.');
+    }
+  
     this.initializeEnemyDeck();
     this.coinFlip();
   }
@@ -79,6 +87,17 @@ export class GamePage implements OnInit {
       this.selectedBackground = savedBackground;
       console.log('Background restored from localStorage:', this.selectedBackground);
     }
+  }
+
+  goToGamePage(deck: any): void {
+    if (!deck || !deck.cards || deck.cards.length < 40) {
+      alert('Please select a valid deck with at least 40 cards.');
+      return;
+    }
+  
+    this.router.navigate(['/game'], {
+      state: { playerDeck: deck } // Pass the selected deck
+    });
   }
 
   getRandomCards(cards: any[], count: number): any[] {

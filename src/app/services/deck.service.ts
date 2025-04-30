@@ -13,7 +13,7 @@ export class DeckService {
   constructor(private authService: AuthService) {
     this.loadDecks(); // Automatically load decks on service initialization
   }
-
+  
   // Fetch all decks for the authenticated user
   async loadDecks(): Promise<void> {
     try {
@@ -42,7 +42,16 @@ export class DeckService {
 
   // Get all decks as an observable
   getDecks(): Observable<{ name: string; cards: any[] }[]> {
-    return this.decksSubject.asObservable();
+    const decksCollection = collection(this.firestore, 'decks');
+    return new Observable((observer) => {
+      getDocs(decksCollection).then((querySnapshot) => {
+        const decks = querySnapshot.docs.map((doc) => doc.data() as { name: string; cards: any[] });
+        observer.next(decks);
+        observer.complete();
+      }).catch((error) => {
+        observer.error(error);
+      });
+    });
   }
 
   // Create a new deck for the authenticated user
@@ -77,42 +86,20 @@ export class DeckService {
   }
 
   // Delete a deck for the authenticated user
-  async deleteDeck(deckName: string): Promise<void> {
+  async deleteDeck(deckId: string): Promise<void> {
     try {
-      const userId = await this.authService.getUserId(); // Get the authenticated user's ID
-      if (!userId) {
-        throw new Error('User is not authenticated.');
+      if (!deckId) {
+        throw new Error('Deck ID is undefined.');
       }
   
-      const deckRef = doc(this.firestore, 'decks', deckName); // Reference to the deck in Firestore
-      const deckDoc = await getDoc(deckRef);
-  
-      // Debugging: Log the deck document and user ID
-      console.log('deckDoc exists:', deckDoc.exists());
-      console.log('deckDoc data:', deckDoc.data());
-      console.log('userId:', userId);
-  
-      // Check if the deck exists and belongs to the authenticated user
-      if (!deckDoc.exists()) {
-        throw new Error(`Deck "${deckName}" does not exist.`);
-      }
-  
-      if (deckDoc.data()?.['userId'] !== userId) {
-        throw new Error('Deck does not belong to the authenticated user.');
-      }
-  
+      const deckRef = doc(this.firestore, 'decks', deckId); // Reference to the deck in Firestore
       await deleteDoc(deckRef); // Delete the deck from Firestore
-      console.log(`Deck "${deckName}" deleted successfully.`);
-  
-      // Optionally, remove the deck from the local state (BehaviorSubject)
-      const currentDecks = this.decksSubject.value.filter(deck => deck.name !== deckName);
-      this.decksSubject.next(currentDecks);
-  
+      console.log(`Deck with ID "${deckId}" deleted successfully.`);
     } catch (error) {
       console.error('Error deleting deck:', error);
       throw new Error('Failed to delete deck.');
     }
-  }  
+  }
   
 
   // Update deck by adding or removing cards

@@ -103,7 +103,7 @@
         <!-- <h2>Your Hand</h2> -->
         <div class="monster-cards">
           <div *ngFor="let card of playerHand" class="monster-card" [ngClass]="{ 'boosted-card': card.isBoosted }">
-            
+            {{card.isBoosted}}
               <img
                 class="card-image"
                 [src]="card?.card_images[0]?.image_url"
