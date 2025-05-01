@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { getFirestore, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDocs, collection, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, deleteDoc, getDocs, collection, getDoc } from 'firebase/firestore';
 import { AuthService } from './auth.service'; // Import AuthService to get the user ID
 import { BehaviorSubject, Observable } from 'rxjs';
 
@@ -13,7 +13,7 @@ export class DeckService {
   constructor(private authService: AuthService) {
     this.loadDecks(); // Automatically load decks on service initialization
   }
-  
+
   // Fetch all decks for the authenticated user
   async loadDecks(): Promise<void> {
     try {
@@ -44,13 +44,15 @@ export class DeckService {
   getDecks(): Observable<{ name: string; cards: any[] }[]> {
     const decksCollection = collection(this.firestore, 'decks');
     return new Observable((observer) => {
-      getDocs(decksCollection).then((querySnapshot) => {
-        const decks = querySnapshot.docs.map((doc) => doc.data() as { name: string; cards: any[] });
-        observer.next(decks);
-        observer.complete();
-      }).catch((error) => {
-        observer.error(error);
-      });
+      getDocs(decksCollection)
+        .then((querySnapshot) => {
+          const decks = querySnapshot.docs.map((doc) => doc.data() as { name: string; cards: any[] });
+          observer.next(decks);
+          observer.complete();
+        })
+        .catch((error) => {
+          observer.error(error);
+        });
     });
   }
 
@@ -91,16 +93,20 @@ export class DeckService {
       if (!deckId) {
         throw new Error('Deck ID is undefined.');
       }
-  
+
       const deckRef = doc(this.firestore, 'decks', deckId); // Reference to the deck in Firestore
       await deleteDoc(deckRef); // Delete the deck from Firestore
+
+      // Remove the deck from the BehaviorSubject
+      const currentDecks = this.decksSubject.value.filter((deck) => deck.name !== deckId);
+      this.decksSubject.next(currentDecks);
+
       console.log(`Deck with ID "${deckId}" deleted successfully.`);
     } catch (error) {
       console.error('Error deleting deck:', error);
       throw new Error('Failed to delete deck.');
     }
   }
-  
 
   // Update deck by adding or removing cards
   async updateDeck(deck: any, card: any | null, isRemove: boolean = false): Promise<void> {
@@ -109,10 +115,10 @@ export class DeckService {
       if (!userId) {
         throw new Error('User is not authenticated.');
       }
-  
+
       const deckRef = doc(this.firestore, 'decks', deck.name); // Reference to the deck in Firestore
       const deckDoc = await getDoc(deckRef);
-  
+
       if (deckDoc.exists()) {
         const updatedDeck = { ...deckDoc.data(), cards: deck.cards };
         await setDoc(deckRef, updatedDeck); // Update the deck in Firestore

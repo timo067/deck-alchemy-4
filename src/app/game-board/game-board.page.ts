@@ -25,7 +25,7 @@ export class GameBoardPage implements OnInit {
   playerTurn: boolean = true;
   phase: string = 'draw';
   background: string = 'default.jpg'; // Fallback background
-  clonedCard: { top: number; left: number; image: string, transformStyle:string } | null = null;
+  clonedCard: { top: number; left: number; image: string, transformStyle: string } | null = null;
   clonedCardAnimating: boolean = false;
   transformStyle: string = '';
   explosion: { top: number; left: number } | null = null;
@@ -44,7 +44,8 @@ export class GameBoardPage implements OnInit {
     const state = navigation?.extras?.state;
 
     if (state) {
-      this.playerDeck = state['playerDeck'] || [];
+      // Normalize the player deck
+      this.playerDeck = (state['playerDeck'] || []).map((card: any) => this.normalizeCard(card));
       this.background = state['background']
         ? `assets/images/${state['background']}`
         : 'assets/images/Blue Eyes White Dragon.jpg'; // Default background
@@ -52,13 +53,40 @@ export class GameBoardPage implements OnInit {
 
     console.log("Selected Background:", this.background);
 
+    // Fetch and normalize the opponent deck
     this.cardService.getCards().subscribe(cards => {
-      this.opponentDeck = this.cardService.getNormalMonsters(cards);
+      this.opponentDeck = this.cardService.getNormalMonsters(cards).map(card => this.normalizeCard(card));
       this.drawInitialCards();
       this.applyRandomBoost();
-  
+
       console.log('Opponent Monster Cards:', this.opponentMonsterCards);
     });
+
+    console.log('Normalized Player Deck:', this.playerDeck);
+  }
+
+  normalizeCard(card: any): any {
+    return {
+      id: card.id || null,
+      name: card.name || 'Unknown Card',
+      imageUrl: card.imageUrl || (card.card_images?.[0]?.image_url || 'assets/images/default-card.jpg'),
+      atk: card.atk || 0,
+      def: card.def || 0,
+      attribute: card.attribute || 'Unknown',
+      archetype: card.archetype || 'None',
+      race: card.race || 'Unknown',
+      type: card.type || 'Unknown',
+      level: card.level || 0,
+      desc: card.desc || 'No description available.',
+      isBoosted: card.isBoosted || false,
+      card_images: card.card_images || [{ image_url: 'assets/images/default-card.jpg' }],
+      card_prices: card.card_prices || [],
+      card_sets: card.card_sets || [],
+      frameType: card.frameType || 'Unknown',
+      humanReadableCardType: card.humanReadableCardType || 'Unknown',
+      typeline: card.typeline || [],
+      ygoprodeck_url: card.ygoprodeck_url || ''
+    };
   }
 
   applyRandomBoost() {
