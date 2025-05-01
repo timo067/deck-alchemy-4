@@ -4,9 +4,9 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-button expand="full" (click)="goHome()">Home</ion-button>
-<ion-button expand="full" (click)="navigateToDeckEditor()">Deck Editor</ion-button>
-<ion-button expand="full" (click)="navigateToCardSearch()">Card Search</ion-button>
+<ion-buttons slot="start">
+  <ion-back-button defaultHref="default"></ion-back-button>
+</ion-buttons>
 
 <ion-content class="ion-padding">
   <ion-card (click)="togglePlayerDeck()">
@@ -26,22 +26,7 @@
         </ion-item>
       </ion-list>
     </ion-card-content>
-  </ion-card>
-
-  <!-- Card Search -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Search Cards</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="searchCards()"></ion-searchbar>
-      <ion-list>
-        <ion-item *ngFor="let card of searchResults" (click)="addCardToPlayerDeck(card)">
-          {{ card.name }}
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
+  </ion-card>  
 
   <!-- Background Selection -->
   <ion-select [(ngModel)]="selectedBackground" (ionChange)="changeBackground(selectedBackground)">
@@ -51,7 +36,5 @@
     <ion-select-option value="Sky Striker.webp">Sky Striker</ion-select-option>
   </ion-select>
   
-
-  <ion-button expand="full" (click)="savePlayerDeck()">Save Player Deck</ion-button>
   <ion-button expand="full" (click)="simulateDuel()">Let's Duel</ion-button>
 </ion-content>
