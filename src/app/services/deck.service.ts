@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { getFirestore, doc, setDoc, deleteDoc, getDocs, collection, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDocs, collection, getDoc } from 'firebase/firestore';
 import { AuthService } from './auth.service'; // Import AuthService to get the user ID
 import { BehaviorSubject, Observable } from 'rxjs';
+import { Deck } from '../deck-list/deck-list.page';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ export class DeckService {
   constructor(private authService: AuthService) {
     this.loadDecks(); // Automatically load decks on service initialization
   }
-
+  
   // Fetch all decks for the authenticated user
   async loadDecks(): Promise<void> {
     try {
@@ -41,18 +42,32 @@ export class DeckService {
   }
 
   // Get all decks as an observable
-  getDecks(): Observable<{ name: string; cards: any[] }[]> {
-    const decksCollection = collection(this.firestore, 'decks');
+  getDecks(): Observable<Deck[]> {
     return new Observable((observer) => {
-      getDocs(decksCollection)
-        .then((querySnapshot) => {
-          const decks = querySnapshot.docs.map((doc) => doc.data() as { name: string; cards: any[] });
-          observer.next(decks);
-          observer.complete();
-        })
-        .catch((error) => {
-          observer.error(error);
+      const userId = this.authService.getUserId();
+      if (!userId) {
+        observer.error('User is not authenticated.');
+        return;
+      }
+  
+      const decksCollection = collection(this.firestore, 'decks');
+      getDocs(decksCollection).then((querySnapshot) => {
+        const userDecks: Deck[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data['userId'] === userId) {
+            userDecks.push({
+              id: doc.id,
+              name: data['name'],
+              cards: data['cards'] || [],
+            });
+          }
         });
+        observer.next(userDecks);
+        observer.complete();
+      }).catch((error) => {
+        observer.error(error);
+      });
     });
   }
 
@@ -93,41 +108,52 @@ export class DeckService {
       if (!deckId) {
         throw new Error('Deck ID is undefined.');
       }
-
+  
       const deckRef = doc(this.firestore, 'decks', deckId); // Reference to the deck in Firestore
       await deleteDoc(deckRef); // Delete the deck from Firestore
-
-      // Remove the deck from the BehaviorSubject
-      const currentDecks = this.decksSubject.value.filter((deck) => deck.name !== deckId);
-      this.decksSubject.next(currentDecks);
-
       console.log(`Deck with ID "${deckId}" deleted successfully.`);
     } catch (error) {
       console.error('Error deleting deck:', error);
       throw new Error('Failed to delete deck.');
     }
   }
+  
 
   // Update deck by adding or removing cards
   async updateDeck(deck: any, card: any | null, isRemove: boolean = false): Promise<void> {
     try {
       const userId = await this.authService.getUserId();
+      console.log('Authenticated User ID:', userId);
       if (!userId) {
         throw new Error('User is not authenticated.');
       }
-
-      const deckRef = doc(this.firestore, 'decks', deck.name); // Reference to the deck in Firestore
-      const deckDoc = await getDoc(deckRef);
-
-      if (deckDoc.exists()) {
-        const updatedDeck = { ...deckDoc.data(), cards: deck.cards };
-        await setDoc(deckRef, updatedDeck); // Update the deck in Firestore
-        console.log(`Deck "${deck.name}" updated in Firestore.`);
+  
+      const deckRef = doc(this.firestore, 'decks', deck.name);
+  
+      if (isRemove && card) {
+        // Remove card from the deck
+        await updateDoc(deckRef, {
+          cards: arrayRemove(card),
+          userId: userId, // Ensure the userId is included
+        });
+      } else if (card) {
+        // Add card to the deck
+        await updateDoc(deckRef, {
+          cards: arrayUnion(card),
+          userId: userId, // Ensure the userId is included
+        });
       } else {
-        throw new Error('Deck does not exist in Firestore.');
+        // Update the entire deck
+        await setDoc(deckRef, {
+          ...deck,
+          userId: userId, // Ensure the userId is included
+        });
       }
+  
+      console.log(`Deck "${deck.name}" updated successfully.`);
     } catch (error) {
       console.error('Error updating deck:', error);
+      throw new Error('Failed to update deck.');
     }
   }
 }

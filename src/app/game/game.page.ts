@@ -10,7 +10,8 @@ import { Router } from '@angular/router';
   standalone: false
 })
 export class GamePage implements OnInit {
-  playerDeck: any = { name: 'Player Deck', cards: [] };
+[x: string]: any;
+  playerDeck: any = { name: '', cards: [] };
   enemyDeck: any = { name: 'Enemy Deck', cards: [] }; // Automatically created enemy deck
   selectedBackground: string = 'Blue Eyes White Dragon.jpg'; // Default background
   showPlayerDeck: boolean = false;
@@ -133,6 +134,32 @@ export class GamePage implements OnInit {
     }
   }
 
+  searchCards() {
+    if (this.searchTerm.trim() === '') {
+      this.searchResults = []; // Clear the results if search term is empty
+      return;
+    }
+  
+    this.cardService.getCards().subscribe(
+      (cards) => {
+        if (cards) {
+          // First, filter by "Normal Monster"
+          const normalMonsters = cards.filter((card: any) => card.type === 'Normal Monster');
+          
+          // Then, filter the "Normal Monsters" by the search term (case-insensitive)
+          this.searchResults = normalMonsters.filter((card: any) => 
+            card.name.toLowerCase().includes(this.searchTerm.toLowerCase()) // Case insensitive search
+          );
+        } else {
+          console.error('No cards data received');
+        }
+      },
+      (error) => {
+        console.error('Error fetching cards', error);
+        alert('Failed to fetch cards. Please try again later.');
+      }
+    );
+  }  
 
   addCardToPlayerDeck(card: any) {
     const cardCount = this.playerDeck.cards.filter((c: any) => c.name === card.name).length;
@@ -183,44 +210,15 @@ export class GamePage implements OnInit {
       alert('Player deck must have 40 cards.');
       return;
     }
-  
-    // Normalize player and enemy decks
-    const normalizedPlayerDeck = this.playerDeck.cards.map((card: any) => this.normalizeCard(card));
-    const normalizedEnemyDeck = this.enemyDeck.cards.map((card: any) => this.normalizeCard(card));
-  
+    
     // Navigate to the GameBoardPage
     this.router.navigate(['/game-board'], {
       state: {
-        playerDeck: normalizedPlayerDeck, // Pass the normalized player deck
-        enemyDeck: normalizedEnemyDeck,  // Pass the normalized enemy deck
+        playerDeck: this.playerDeck.cards, // Pass the player deck
+        enemyDeck: this.enemyDeck.cards,  // Pass the enemy deck
         background: this.selectedBackground // Pass the selected background
       }
     });
-  }
-  
-  // Add the normalizeCard method if it doesn't already exist in this file
-  private normalizeCard(card: any): any {
-    return {
-      id: card.id || null,
-      name: card.name || 'Unknown Card',
-      imageUrl: card.imageUrl || (card.card_images?.[0]?.image_url || 'assets/images/default-card.jpg'),
-      atk: card.atk || 0,
-      def: card.def || 0,
-      attribute: card.attribute || 'Unknown',
-      archetype: card.archetype || 'None',
-      race: card.race || 'Unknown',
-      type: card.type || 'Unknown',
-      level: card.level || 0,
-      desc: card.desc || 'No description available.',
-      isBoosted: card.isBoosted || false,
-      card_images: card.card_images || [{ image_url: 'assets/images/default-card.jpg' }],
-      card_prices: card.card_prices || [],
-      card_sets: card.card_sets || [],
-      frameType: card.frameType || 'Unknown',
-      humanReadableCardType: card.humanReadableCardType || 'Unknown',
-      typeline: card.typeline || [],
-      ygoprodeck_url: card.ygoprodeck_url || ''
-    };
   }
 
   // Go to home page

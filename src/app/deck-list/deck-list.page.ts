@@ -70,12 +70,21 @@ export class DeckListPage {
     }
 
     const newDeck: Deck = {
-      name: deckName, cards: [],
-      id: ''
+      id: '', // Firestore will generate the ID
+      name: deckName,
+      cards: [],
     };
-    this.decks.push(newDeck);
-    this.saveDecks(); // Save to localStorage
-    console.log('New deck created:', newDeck);
+
+    // Save the new deck to Firestore
+    this.deckService.createDeck(newDeck.name).then(() => {
+      this.decks.push(newDeck); // Add the new deck to the local list
+      this.saveDecks(); // Save to localStorage
+      console.log('New deck created and saved to Firestore:', newDeck);
+      alert(`Deck "${deckName}" created successfully!`);
+    }).catch((error) => {
+      console.error('Failed to create deck:', error);
+      alert('Failed to create the deck. Please try again.');
+    });
   }
 
   // Navigate to the deck editor to edit an existing deck
