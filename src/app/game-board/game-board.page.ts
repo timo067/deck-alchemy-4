@@ -123,9 +123,51 @@ export class GameBoardPage implements OnInit {
   drawInitialCards() {
     this.playerHand = this.drawCards(this.playerDeck, 5);
     this.opponentHand = this.drawCards(this.opponentDeck, 5);
-
+  
+    // Check hand limits after the initial draw
+    if (this.playerHand.length > 7) {
+      alert('Your hand is full! Please discard a card.');
+      this.promptPlayerToDiscard();
+    }
+  
+    if (this.opponentHand.length > 7) {
+      this.discardRandomCard(false);
+    }
+  
     console.log('Player Hand:', this.playerHand);
     console.log('Opponent Hand:', this.opponentHand);
+  }
+
+  discardCard(card: any, isPlayer: boolean): void {
+    if (isPlayer) {
+      this.playerHand = this.playerHand.filter(c => c !== card);
+      console.log(`Player discarded: ${card.name}`);
+    } else {
+      this.opponentHand = this.opponentHand.filter(c => c !== card);
+      console.log(`Opponent discarded: ${card.name}`);
+    }
+  }
+
+  promptPlayerToDiscard(): void {
+    const discardableCards = this.playerHand.map((card, index) => `${index + 1}: ${card.name}`).join('\n');
+    const choice = prompt(`Your hand is full. Choose a card to discard:\n${discardableCards}`);
+  
+    const cardIndex = parseInt(choice || '', 10) - 1;
+    if (!isNaN(cardIndex) && cardIndex >= 0 && cardIndex < this.playerHand.length) {
+      const cardToDiscard = this.playerHand[cardIndex];
+      this.discardCard(cardToDiscard, true);
+    } else {
+      alert('Invalid choice. Please try again.');
+      this.promptPlayerToDiscard();
+    }
+  }
+
+  discardRandomCard(isPlayer: boolean): void {
+    if (!isPlayer && this.opponentHand.length > 0) {
+      const randomIndex = Math.floor(Math.random() * this.opponentHand.length);
+      const cardToDiscard = this.opponentHand[randomIndex];
+      this.discardCard(cardToDiscard, false);
+    }
   }
 
   drawCards(deck: any[], count: number): any[] {
@@ -139,12 +181,23 @@ export class GameBoardPage implements OnInit {
       if (newCard) {
         this.playerHand.push(newCard);
         console.log('Player draws card:', newCard);
+  
+        // Check if the player's hand exceeds the limit
+        if (this.playerHand.length > 7) {
+          alert('Your hand is full! Please discard a card.');
+          this.promptPlayerToDiscard();
+        }
       }
     } else {
       const newCard = this.drawCards(this.opponentDeck, 1)[0];
       if (newCard) {
         this.opponentHand.push(newCard);
         console.log('Opponent draws card:', newCard);
+  
+        // Check if the opponent's hand exceeds the limit
+        if (this.opponentHand.length > 7) {
+          this.discardRandomCard(false);
+        }
       }
     }
   }
@@ -232,22 +285,34 @@ export class GameBoardPage implements OnInit {
       alert('You can only play cards during the Main Phase!');
       return;
     }
-
+  
     if (this.hasSummonedThisTurn) {
       alert('You can only summon one card per turn!');
       return;
     }
-
+  
     if (this.playerTurn) {
+      // Check if the player's field has reached the limit
+      if (this.playerMonsterCards.length >= 5) {
+        alert('You cannot summon more than 5 cards on the field!');
+        return;
+      }
+  
       console.log('Playing card:', card);
       this.summonCard(card, true);
       this.playerHand = this.playerHand.filter(c => c !== card);
     } else {
-      console.log('Playing card:', card);
+      // Check if the opponent's field has reached the limit
+      if (this.opponentMonsterCards.length >= 5) {
+        alert('Opponent cannot summon more than 5 cards on the field!');
+        return;
+      }
+  
+      console.log('Opponent plays card:', card);
       this.summonCard(card, false);
       this.opponentHand = this.opponentHand.filter(c => c !== card);
     }
-
+  
     this.selectedCard = null;
     this.hasSummonedThisTurn = true;
   }
@@ -362,7 +427,7 @@ export class GameBoardPage implements OnInit {
     this.selectedCard = null;
     this.selectedTarget = null;
     this.checkGameEnd();
-  } 
+  }  
 
   checkGameEnd() {
     if (this.lifePoints <= 0) {
@@ -405,31 +470,33 @@ export class GameBoardPage implements OnInit {
   opponentTurn() {
     // Opponent draws a card
     this.drawCard();
-
+  
     // Opponent plays a random card from their hand if they have any
-    if (this.opponentHand.length > 0) {
+    if (this.opponentHand.length > 0 && this.opponentMonsterCards.length < 5) {
       const randomIndex = Math.floor(Math.random() * this.opponentHand.length);
       const cardToPlay = this.opponentHand[randomIndex];
-
+  
       console.log('Opponent plays:', cardToPlay);
       this.opponentMonsterCards.push(cardToPlay);
-
+  
       // Remove card from opponent's hand
       this.opponentHand = this.opponentHand.filter(c => c !== cardToPlay);
+    } else if (this.opponentMonsterCards.length >= 5) {
+      console.log('Opponent cannot summon more than 5 cards on the field!');
     }
-
+  
     // Opponent attacks if they have monsters
     if (this.opponentMonsterCards.length > 0 && this.playerMonsterCards.length > 0) {
       const attackingCard = this.opponentMonsterCards[0]; // First monster
       const targetCard = this.playerMonsterCards[0]; // First player's monster
-
+  
       this.selectedCard = attackingCard;
       this.selectedTarget = targetCard;
-
+  
       console.log('Opponent attacks with:', attackingCard);
       this.attack();
     }
-
+  
     // End opponent's turn
     this.endTurn();
   }
