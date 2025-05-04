@@ -43,7 +43,7 @@ export class DeckListPage {
         id: deck.id || '' // Ensure each deck has an 'id' property
       }));
       console.log('Decks loaded from Firestore:', this.decks);
-  
+
       // Save the decks to localStorage for persistence
       localStorage.setItem('decks', JSON.stringify(this.decks));
     });
@@ -61,22 +61,15 @@ export class DeckListPage {
       alert('Please enter a valid deck name.');
       return;
     }
-
-    // Check if a deck with the same name already exists
-    const existingDeck = this.decks.find((deck) => deck.name.toLowerCase() === deckName.toLowerCase());
-    if (existingDeck) {
-      alert(`A deck with the name "${deckName}" already exists. Please choose a different name.`);
-      return;
-    }
-
-    const newDeck: Deck = {
-      id: '', // Firestore will generate the ID
-      name: deckName,
-      cards: [],
-    };
-
+  
     // Save the new deck to Firestore
-    this.deckService.createDeck(newDeck.name).then(() => {
+    this.deckService.createDeck(deckName).then((docRef) => {
+      const newDeck: Deck = {
+        id: docRef.id, // Assign Firestore-generated ID
+        name: deckName,
+        cards: [],
+      };
+  
       this.decks.push(newDeck); // Add the new deck to the local list
       this.saveDecks(); // Save to localStorage
       console.log('New deck created and saved to Firestore:', newDeck);
@@ -102,7 +95,9 @@ export class DeckListPage {
     this.deckService.deleteDeck(deck.id).then(() => {
       // Remove the deck locally
       this.decks = this.decks.filter((d) => d.id !== deck.id);
+      this.saveDecks(); // Save updated decks to localStorage
       console.log('Deck deleted:', deck);
+      alert(`Deck "${deck.name}" has been deleted.`);
     }).catch((error) => {
       console.error('Failed to delete deck:', error);
       alert(error.message || 'Failed to delete the deck. Please try again.');

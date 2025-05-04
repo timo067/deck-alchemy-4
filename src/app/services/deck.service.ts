@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { getFirestore, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDocs, collection, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDocs, collection, getDoc, addDoc } from 'firebase/firestore';
 import { AuthService } from './auth.service'; // Import AuthService to get the user ID
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Deck } from '../deck-list/deck-list.page';
@@ -22,18 +22,22 @@ export class DeckService {
       if (!userId) {
         throw new Error('User ID is missing. Please log in again.');
       }
-
+  
       const decksCollection = collection(this.firestore, 'decks');
       const querySnapshot = await getDocs(decksCollection);
-
-      const userDecks: { name: string; cards: any[] }[] = [];
+  
+      const userDecks: { id: string; name: string; cards: any[] }[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         if (data['userId'] === userId) {
-          userDecks.push({ name: data['name'], cards: data['cards'] || [] });
+          userDecks.push({
+            id: doc.id, // Include the Firestore document ID
+            name: data['name'],
+            cards: data['cards'] || [],
+          });
         }
       });
-
+  
       this.decksSubject.next(userDecks); // Update the BehaviorSubject with the fetched decks
     } catch (error) {
       console.error('Error fetching decks:', error);
@@ -72,30 +76,28 @@ export class DeckService {
   }
 
   // Create a new deck for the authenticated user
-  async createDeck(deckName: string): Promise<void> {
+  async createDeck(deckName: string): Promise<any> {
     try {
       if (!deckName.trim()) {
         throw new Error('Deck name cannot be empty.');
       }
-
+  
       const userId = await this.authService.getUserId();
       if (!userId) {
         throw new Error('User ID is missing. Please log in again.');
       }
-
-      const deckRef = doc(this.firestore, 'decks', deckName);
-
-      await setDoc(deckRef, {
+  
+      const decksCollection = collection(this.firestore, 'decks');
+      const newDeck = {
         userId: userId,
         name: deckName,
         cards: [],
-      });
-
-      // Add the new deck to the BehaviorSubject
-      const currentDecks = this.decksSubject.value;
-      this.decksSubject.next([...currentDecks, { name: deckName, cards: [] }]);
-
-      console.log(`Deck "${deckName}" created successfully for user: ${userId}`);
+      };
+  
+      // Add the new deck to Firestore and return the document reference
+      const docRef = await addDoc(decksCollection, newDeck);
+      console.log(`Deck "${deckName}" created successfully with ID: ${docRef.id}`);
+      return docRef; // Return the document reference
     } catch (error) {
       console.error('Error creating deck:', error);
       throw new Error('Failed to create deck.');
@@ -104,18 +106,14 @@ export class DeckService {
 
   // Delete a deck for the authenticated user
   async deleteDeck(deckId: string): Promise<void> {
-    try {
-      if (!deckId) {
-        throw new Error('Deck ID is undefined.');
-      }
-  
-      const deckRef = doc(this.firestore, 'decks', deckId); // Reference to the deck in Firestore
-      await deleteDoc(deckRef); // Delete the deck from Firestore
-      console.log(`Deck with ID "${deckId}" deleted successfully.`);
-    } catch (error) {
-      console.error('Error deleting deck:', error);
-      throw new Error('Failed to delete deck.');
+    const userId = await this.authService.getUserId();
+    if (!userId) {
+      throw new Error('User is not authenticated.');
     }
+  
+    const deckRef = doc(this.firestore, 'decks', deckId);
+    await deleteDoc(deckRef);
+    console.log(`Deck with ID "${deckId}" deleted successfully.`);
   }
   
 
