@@ -37,6 +37,11 @@ export class DeckEditorPage {
   ) {}
 
   ngOnInit(): void {
+    const navigation = this.router.getCurrentNavigation();
+  if (navigation?.extras.state) {
+    this.selectedDeck = navigation.extras.state['deck'];
+    console.log('Editing deck:', this.selectedDeck);
+  }
     this.restoreState(); // Restore state on initialization
   }
   
@@ -72,6 +77,26 @@ export class DeckEditorPage {
       console.error('Error loading decks:', error);
       alert('Failed to load decks. Please ensure you are logged in.');
     }
+  }
+
+  sanitizeCard(card: any): any {
+    const sanitizedCard: any = {};
+    for (const key in card) {
+      if (card[key] !== undefined) {
+        sanitizedCard[key] = card[key];
+      }
+    }
+    return sanitizedCard;
+  }
+
+  selectCard(card: any): void {
+    const sanitizedCard = this.sanitizeCard(card); // Sanitize the card object
+    console.log('Selected card (sanitized):', sanitizedCard);
+    this.deckService.updateDeck(this.selectedDeck, sanitizedCard, false).then(() => {
+      console.log('Card added to deck:', sanitizedCard);
+    }).catch((error) => {
+      console.error('Failed to add card to deck:', error);
+    });
   }
 
     // Save the selected deck to localStorage
@@ -146,7 +171,20 @@ export class DeckEditorPage {
           this.allCards = response.data.map((card: any) => ({
             id: card.id,
             name: card.name,
-            imageUrl: card.card_images[0]?.image_url || 'https://via.placeholder.com/150',
+            type: card.type,
+            desc: card.desc,
+            atk: card.atk,
+            def: card.def,
+            level: card.level,
+            race: card.race,
+            attribute: card.attribute,
+            archetype: card.archetype,
+            frameType: card.frameType,
+            humanReadableCardType: card.humanReadableCardType,
+            typeline: card.typeline,
+            isBoosted: card.isBoosted || false,
+            imageUrl: card.card_images?.[0]?.image_url, // Map the correct field for the image URL
+            ygoprodeck_url: card.ygoprodeck_url,
           }));
         } else {
           this.allCards = [];
@@ -169,16 +207,17 @@ export class DeckEditorPage {
           return;
         }
       
-        const cardCount = this.selectedDeck.cards.filter((c: Card) => c.id === card.id).length;
+        const sanitizedCard = this.sanitizeCard(card); // Sanitize the card object
+        const cardCount = this.selectedDeck.cards.filter((c: Card) => c.id === sanitizedCard.id).length;
       
         if (cardCount < 3) {
-          this.selectedDeck.cards.push(card);
+          this.selectedDeck.cards.push(sanitizedCard);
           this.saveSelectedDeck(); // Save the updated selected deck to localStorage
           this.saveDecks(); // Save all decks to localStorage
-          this.deckService.updateDeck(this.selectedDeck, card); // Update Firestore
-          console.log(`Card "${card.name}" added to deck "${this.selectedDeck.name}".`);
+          this.deckService.updateDeck(this.selectedDeck, sanitizedCard); // Update Firestore
+          console.log(`Card "${sanitizedCard.name}" added to deck "${this.selectedDeck.name}".`);
         } else {
-          alert(`You can only add "${card.name}" up to 3 times.`);
+          alert(`You can only add "${sanitizedCard.name}" up to 3 times.`);
         }
       }
 

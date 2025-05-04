@@ -128,17 +128,17 @@ export class DeckService {
       const deckRef = doc(this.firestore, 'decks', deck.id); // Use deck.id instead of deck.name
   
       if (isRemove && card) {
-        // Remove card from the deck
+        console.log('Removing card from deck:', card);
         await updateDoc(deckRef, {
           cards: arrayRemove(card),
         });
       } else if (card) {
-        // Add card to the deck
+        console.log('Adding card to deck:', card);
         await updateDoc(deckRef, {
-          cards: arrayUnion(card),
+          cards: arrayUnion(card), // Ensure the full card object is passed here
         });
       } else {
-        // Update the entire deck
+        console.log('Updating entire deck:', deck);
         await setDoc(deckRef, {
           ...deck,
           userId: userId,
@@ -181,4 +181,6 @@ export class DeckService {
       throw new Error('Failed to migrate old decks to Firestore.');
     }
   }
+
+  
 }

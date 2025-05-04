@@ -1,4 +1,3 @@
-
 <ion-content>
   <div class="deck-editor-container">
     <ion-header>
@@ -11,44 +10,48 @@
       </ion-toolbar>
     </ion-header>
 
-  <!-- Deck List -->
-  <ion-list>
-    <ion-item *ngFor="let deck of decks" (click)="selectDeckFromList(deck)">
-      <ion-label>{{ deck.name }}</ion-label>
+    <!-- Deck List -->
+    <ion-list>
+      <ion-item *ngFor="let deck of decks" (click)="selectDeckFromList(deck)">
+        <ion-label>{{ deck.name }}</ion-label>
+      </ion-item>
+    </ion-list>
+
+    <!-- Selected Deck Display -->
+    <ion-card *ngIf="selectedDeck">
+      <ion-card-header>
+        <ion-card-title>{{ selectedDeck.name }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let card of filteredCards">
+            <ion-thumbnail slot="start">
+              <img [src]="card.imageUrl" alt="{{ card.name }}">
+            </ion-thumbnail>
+            <ion-label>{{ card.name }}</ion-label>
+            <ion-button (click)="removeFromDeck(card)">Remove</ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Search Cards -->
+    <ion-item>
+      <ion-input [(ngModel)]="searchTerm" placeholder="Search cards"></ion-input>
+      <ion-button (click)="searchCards()">Search</ion-button>
     </ion-item>
-  </ion-list>
 
-  <!-- Selected Deck Display -->
-  <ion-card *ngIf="selectedDeck">
-    <ion-card-header>
-      <ion-card-title>{{ selectedDeck.name }}</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-list>
-        <ion-item *ngFor="let card of filteredCards">
-          <ion-thumbnail slot="start">
-            <img [src]="card.imageUrl" alt="{{ card.name }}">
-          </ion-thumbnail>
-          <ion-label>{{ card.name }}</ion-label>
-          <ion-button (click)="removeFromDeck(card)">Remove</ion-button>
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Search Cards -->
-  <ion-item>
-    <ion-input [(ngModel)]="searchTerm" placeholder="Search cards"></ion-input>
-    <ion-button (click)="searchCards()">Search</ion-button>
-  </ion-item>
-
-  <!-- Card Search Results -->
-  <ion-list>
-    <ion-item *ngFor="let card of allCards">
-      <ion-thumbnail slot="start">
-        <img [src]="card.imageUrl" alt="{{ card.name }}">
-      </ion-thumbnail>
-      <ion-label>{{ card.name }}</ion-label>
-      <ion-button (click)="addToDeck(card)">Add</ion-button>
-    </ion-item>
-  </ion-list>
+    <!-- Card Search Results -->
+    <ion-list>
+      <ion-item *ngFor="let card of allCards">
+        <ion-thumbnail slot="start">
+          <img [src]="card.imageUrl" alt="{{ card.name }}">
+        </ion-thumbnail>
+        <ion-label>{{ card.name }}</ion-label>
+        <ion-button (click)="addToDeck(card)">Add</ion-button>
+        <!-- New button for selecting a card -->
+        <ion-button color="secondary" (click)="selectCard(card)">Select</ion-button>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>
