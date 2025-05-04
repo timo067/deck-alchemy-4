@@ -30,6 +30,14 @@ export class DeckListPage {
     if (savedDecks) {
       this.decks = JSON.parse(savedDecks);
       console.log('Decks restored from localStorage:', this.decks);
+  
+      // Migrate old decks to Firestore
+      this.deckService.migrateOldDecksToFirestore(this.decks).then(() => {
+        this.saveDecks(); // Save updated decks with Firestore IDs to localStorage
+        console.log('Old decks migrated to Firestore.');
+      }).catch((error) => {
+        console.error('Error migrating old decks:', error);
+      });
     } else {
       this.loadDecks(); // Load from Firestore if not in localStorage
     }
@@ -88,10 +96,15 @@ export class DeckListPage {
   // Delete a deck
   deleteDeck(deck: any): void {
     if (!deck.id) {
-      alert('Deck ID is missing. Cannot delete this deck.');
+      // If the deck does not have an ID, remove it locally
+      this.decks = this.decks.filter((d) => d.name !== deck.name);
+      this.saveDecks(); // Save updated decks to localStorage
+      console.log(`Old deck "${deck.name}" deleted locally.`);
+      alert(`Old deck "${deck.name}" has been deleted.`);
       return;
     }
   
+    // Delete the deck from Firestore
     this.deckService.deleteDeck(deck.id).then(() => {
       // Remove the deck locally
       this.decks = this.decks.filter((d) => d.id !== deck.id);

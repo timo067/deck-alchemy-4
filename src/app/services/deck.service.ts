@@ -121,37 +121,64 @@ export class DeckService {
   async updateDeck(deck: any, card: any | null, isRemove: boolean = false): Promise<void> {
     try {
       const userId = await this.authService.getUserId();
-      console.log('Authenticated User ID:', userId);
       if (!userId) {
         throw new Error('User is not authenticated.');
       }
   
-      const deckRef = doc(this.firestore, 'decks', deck.name);
+      const deckRef = doc(this.firestore, 'decks', deck.id); // Use deck.id instead of deck.name
   
       if (isRemove && card) {
         // Remove card from the deck
         await updateDoc(deckRef, {
           cards: arrayRemove(card),
-          userId: userId, // Ensure the userId is included
         });
       } else if (card) {
         // Add card to the deck
         await updateDoc(deckRef, {
           cards: arrayUnion(card),
-          userId: userId, // Ensure the userId is included
         });
       } else {
         // Update the entire deck
         await setDoc(deckRef, {
           ...deck,
-          userId: userId, // Ensure the userId is included
-        });
+          userId: userId,
+        }, { merge: true }); // Use merge to avoid overwriting
       }
   
       console.log(`Deck "${deck.name}" updated successfully.`);
     } catch (error) {
       console.error('Error updating deck:', error);
-      throw new Error('Failed to update deck.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to update deck: ${errorMessage}`);
+    }
+  }
+
+  async migrateOldDecksToFirestore(decks: Deck[]): Promise<void> {
+    try {
+      const userId = await this.authService.getUserId();
+      if (!userId) {
+        throw new Error('User is not authenticated.');
+      }
+  
+      const decksCollection = collection(this.firestore, 'decks');
+  
+      for (const deck of decks) {
+        if (!deck.id) {
+          // Save the deck to Firestore
+          const newDeck = {
+            userId: userId,
+            name: deck.name,
+            cards: deck.cards || [],
+          };
+  
+          const docRef = await addDoc(decksCollection, newDeck);
+          deck.id = docRef.id; // Assign the Firestore-generated ID to the deck
+          console.log(`Migrated deck "${deck.name}" to Firestore with ID: ${docRef.id}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error migrating old decks to Firestore:', error);
+      throw new Error('Failed to migrate old decks to Firestore.');
     }
   }
 }
