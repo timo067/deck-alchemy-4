@@ -46,7 +46,8 @@
       <!-- Game Controls -->
       <div class="game-controls">
         <div>
-          <button (click)="nextPhase()">Next Phase</button>
+      <!-- Disable buttons when it's not the player's turn -->
+      <ion-button [disabled]="!playerTurn" (click)="nextPhase()">Next Phase</ion-button>        
         </div>
       </div>
 
@@ -59,62 +60,70 @@
     </div>
 
     <div class="game-content">
-          <!-- Opponent's Hand -->
-          <div class="game-area">
-            <div class="monster-cards">
-              <div *ngFor="let card of opponentHand" class="monster-card">
-                <ion-thumbnail slot="start">
-                  <img class="card-image" src="assets/images/sleeves.jpg" alt="Card Back" />
-                </ion-thumbnail>
-              </div>
-            </div>
+      <!-- Opponent's Hand -->
+      <div class="game-area">
+        <div class="monster-cards">
+          <div *ngFor="let card of opponentHand" class="monster-card">
+            <ion-thumbnail slot="start">
+              <img class="card-image" src="assets/images/sleeves.jpg" alt="Card Back" />
+            </ion-thumbnail>
           </div>
-
-     <!-- Opponent's Field -->
-     <div class="game-area">
-      <div class="monster-cards">
-        <div *ngFor="let card of opponentMonsterCards" class="monster-card" [attr.data-card-id]="card.id">
-          <ion-thumbnail>
-            <img class="card-image" [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}" />
-          </ion-thumbnail>
-          <ion-label>{{ card?.name }}</ion-label>
-          <ion-button (click)="selectTarget(card)">Select Target</ion-button>
         </div>
       </div>
-    </div>
 
-    <!-- Player's Field -->
-    <div class="game-area">
-      <div class="monster-cards">
-        <div *ngFor="let card of playerMonsterCards" class="monster-card" [attr.data-card-id]="card.id" [ngClass]="{ 'boosted-card': card.isBoosted }">
-          <ion-thumbnail>
+      <!-- Opponent's Field -->
+      <div class="game-area">
+        <div class="monster-cards">
+          <div *ngFor="let card of opponentMonsterCards" class="monster-card" [attr.data-card-id]="card.id">
+            <ion-thumbnail>
+              <img class="card-image" [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}" />
+            </ion-thumbnail>
+            <ion-label>{{ card?.name }}</ion-label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player's Field -->
+      <div class="game-area">
+        <div class="monster-cards">
+          <div
+            *ngFor="let card of playerMonsterCards"
+            class="monster-card"
+            [attr.data-card-id]="card.id"
+            [ngClass]="{ 'boosted-card': card.isBoosted }"
+          >
+            <ion-thumbnail>
+              <img
+                class="card-image"
+                [src]="card?.imageUrl || 'assets/images/default-card.jpg'"
+                alt="{{ card?.name || 'Unknown Card' }}"
+              />
+            </ion-thumbnail>
+            <ion-label>{{ card?.name || 'Unknown Card' }}</ion-label>
+            <p *ngIf="card.isBoosted">🔥 Boosted!</p>
+            <ion-button [disabled]="!playerTurn" (click)="selectCard(card)">Select</ion-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player's Hand -->
+      <div class="game-area">
+        <div class="monster-cards">
+          <div
+            *ngFor="let card of playerHand"
+            class="monster-card"
+            [ngClass]="{ 'boosted-card': card.isBoosted }"
+          >
             <img
               class="card-image"
               [src]="card?.imageUrl || 'assets/images/default-card.jpg'"
               alt="{{ card?.name || 'Unknown Card' }}"
             />
-          </ion-thumbnail>
-          <ion-label>{{ card?.name || 'Unknown Card' }}</ion-label>
-          <p *ngIf="card.isBoosted">🔥 Boosted!</p>
-          <ion-button (click)="selectCard(card)">Select</ion-button>
+            <p *ngIf="card.isBoosted">🔥 Boosted!</p>
+            <ion-button [disabled]="!playerTurn" (click)="playCard(card)">Play</ion-button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- Player's Hand -->
-    <div class="game-area">
-      <div class="monster-cards">
-        <div *ngFor="let card of playerHand" class="monster-card" [ngClass]="{ 'boosted-card': card.isBoosted }">
-          <img
-            class="card-image"
-            [src]="card?.imageUrl || 'assets/images/default-card.jpg'"
-            alt="{{ card?.name || 'Unknown Card' }}"
-          />
-          <p *ngIf="card.isBoosted">🔥 Boosted!</p>
-          <ion-button (click)="playCard(card)">Play</ion-button>
-        </div>
-      </div>
-    </div>
     </div>
   </div>
 </ion-content>

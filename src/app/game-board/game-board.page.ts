@@ -318,40 +318,44 @@ export class GameBoardPage implements OnInit {
   }
 
   attack() {
-    if (this.phase !== 'battle') return;
-    if (!this.selectedCard || !this.selectedTarget) return;
-
+    if (this.phase !== 'battle') {
+      console.log('Attack can only be performed during the Battle Phase.');
+      return;
+    }
+    if (!this.selectedCard || !this.selectedTarget) {
+      console.log('No attacking or target card selected.');
+      return;
+    }
+  
     const attacker = document.querySelector(`[data-card-id="${this.selectedCard.id}"]`) as HTMLElement;
     const target = document.querySelector(`[data-card-id="${this.selectedTarget.id}"]`) as HTMLElement;
-    if (!attacker || !target) return;
-
+  
+    if (!attacker || !target) {
+      console.log('Attacker or target card element not found.');
+      return;
+    }
+  
     const attackerRect = attacker.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
-
+  
     const deltaX = targetRect.left - attackerRect.left;
     const deltaY = targetRect.top - attackerRect.top;
-
-    attacker.classList.add('attacking-card');
-    target.classList.add('targeted-card');
-
-    this.clonedCard = {
-      top: attackerRect.top,
-      left: attackerRect.left,
-      transformStyle: `translate(${deltaX}px, ${deltaY}px) scale(1.2)`,
-      image: this.selectedCard.imageUrl || 'assets/images/default-card.jpg',
-    };
-
+  
+    console.log('Starting attack animation...');
+    console.log('Attacker:', this.selectedCard);
+    console.log('Target:', this.selectedTarget);
+  
     const clonedElement = this.renderer.createElement('div');
     this.renderer.setStyle(clonedElement, 'position', 'fixed');
     this.renderer.setStyle(clonedElement, 'top', `${attackerRect.top}px`);
     this.renderer.setStyle(clonedElement, 'left', `${attackerRect.left}px`);
     this.renderer.setStyle(clonedElement, 'width', '120px');
     this.renderer.setStyle(clonedElement, 'height', '180px');
-    this.renderer.setStyle(clonedElement, 'background-image', `url(${this.clonedCard.image})`);
+    this.renderer.setStyle(clonedElement, 'background-image', `url(${this.selectedCard.imageUrl})`);
     this.renderer.setStyle(clonedElement, 'background-size', 'cover');
     this.renderer.setStyle(clonedElement, 'z-index', '1000');
     this.renderer.appendChild(document.body, clonedElement);
-
+  
     gsap.to(clonedElement, {
       x: deltaX,
       y: deltaY,
@@ -359,6 +363,7 @@ export class GameBoardPage implements OnInit {
       duration: 0.6,
       ease: 'power2.out',
       onComplete: () => {
+        console.log('Attack animation completed.');
         this.renderer.removeChild(document.body, clonedElement);
         this.triggerExplosion(targetRect);
         this.performAttack();
@@ -395,8 +400,12 @@ export class GameBoardPage implements OnInit {
   }
 
   performAttack() {
-    const attackerAtk = this.selectedCard?.atk || 0; // Ensure attack points are a valid number
-    const targetDef = this.selectedTarget?.def || 0; // Ensure defense points are a valid number
+    const attackerAtk = this.selectedCard?.atk || 0; // Ensure attack points are valid
+    const targetDef = this.selectedTarget?.def || 0; // Ensure defense points are valid
+  
+    console.log('Performing attack...');
+    console.log('Attacker ATK:', attackerAtk);
+    console.log('Target DEF:', targetDef);
   
     if (this.playerTurn) {
       if (attackerAtk > targetDef) {
@@ -427,7 +436,7 @@ export class GameBoardPage implements OnInit {
     this.selectedCard = null;
     this.selectedTarget = null;
     this.checkGameEnd();
-  }  
+  }
 
   checkGameEnd() {
     if (this.lifePoints <= 0) {
@@ -442,62 +451,111 @@ export class GameBoardPage implements OnInit {
   }
 
   endTurn() {
+    console.log('Ending turn. Current turn:', this.playerTurn ? 'Player' : 'Opponent');
+  
+    // Toggle the turn
     this.playerTurn = !this.playerTurn;
+  
+    // Reset selected cards and phase
     this.selectedCard = null;
     this.selectedTarget = null;
     this.phase = 'draw';
     this.hasSummonedThisTurn = false;
+  
+    console.log('Turn ended. Next turn:', this.playerTurn ? 'Player' : 'Opponent');
+  
+    // Draw a card for the current player
     this.drawCard();
-    console.log('Turn ended. Player turn:', this.playerTurn);
-
+  
+    // If it's the opponent's turn, call the opponentTurn method
     if (!this.playerTurn) {
+      console.log('Opponent\'s turn starts.');
       this.opponentTurn();
+    } else {
+      console.log('Player\'s turn starts.');
     }
   }
 
   nextPhase() {
+    console.log('Current Phase:', this.phase);
+  
     if (this.phase === 'draw') {
       this.phase = 'main';
     } else if (this.phase === 'main') {
       this.phase = 'battle';
     } else if (this.phase === 'battle') {
       this.phase = 'end';
+      console.log('Ending turn...');
       this.endTurn();
     }
-    console.log('Phase:', this.phase);
+  
+    console.log('Next Phase:', this.phase);
   }
 
   opponentTurn() {
-    // Opponent draws a card
-    this.drawCard();
+    if (!this.playerTurn) {
+      console.log('Opponent\'s turn.');
   
-    // Opponent plays a random card from their hand if they have any
-    if (this.opponentHand.length > 0 && this.opponentMonsterCards.length < 5) {
-      const randomIndex = Math.floor(Math.random() * this.opponentHand.length);
-      const cardToPlay = this.opponentHand[randomIndex];
+      // Opponent draws a card
+      this.drawCard();
   
-      console.log('Opponent plays:', cardToPlay);
-      this.opponentMonsterCards.push(cardToPlay);
+      // Opponent plays a random card from their hand if they have any
+      if (this.opponentHand.length > 0 && this.opponentMonsterCards.length < 5) {
+        const randomIndex = Math.floor(Math.random() * this.opponentHand.length);
+        const cardToPlay = this.opponentHand[randomIndex];
   
-      // Remove card from opponent's hand
-      this.opponentHand = this.opponentHand.filter(c => c !== cardToPlay);
-    } else if (this.opponentMonsterCards.length >= 5) {
-      console.log('Opponent cannot summon more than 5 cards on the field!');
+        console.log('Opponent plays:', cardToPlay);
+        this.opponentMonsterCards.push(cardToPlay);
+  
+        // Remove card from opponent's hand
+        this.opponentHand = this.opponentHand.filter(c => c !== cardToPlay);
+      } else if (this.opponentMonsterCards.length >= 5) {
+        console.log('Opponent cannot summon more than 5 cards on the field!');
+      }
+  
+      // Opponent attacks if they have monsters
+      if (this.opponentMonsterCards.length > 0 && this.playerMonsterCards.length > 0) {
+        console.log('Opponent is evaluating attack options...');
+        console.log('Opponent\'s Monsters:', this.opponentMonsterCards);
+        console.log('Player\'s Monsters:', this.playerMonsterCards);
+  
+        const attackingCard = this.opponentMonsterCards.find(card =>
+          this.playerMonsterCards.some(playerCard => card.atk > playerCard.def)
+        );
+  
+        if (attackingCard) {
+          const targetCard = this.playerMonsterCards.find(playerCard => attackingCard.atk > playerCard.def);
+  
+          if (targetCard) {
+            this.selectedCard = attackingCard;
+            this.selectedTarget = targetCard;
+  
+            console.log('Opponent attacks with:', attackingCard, 'Targeting:', targetCard);
+  
+            // Trigger the attack animation
+            this.attack();
+  
+            // End opponent's turn after the attack
+            setTimeout(() => {
+              console.log('Opponent\'s turn ends after attack.');
+              this.endTurn();
+            }, 1000); // Add a delay to allow the attack animation to complete
+            return;
+          } else {
+            console.log('No valid target found for attack.');
+          }
+        } else {
+          console.log('No valid attacking card found.');
+        }
+      } else {
+        console.log('Opponent cannot attack. No monsters available.');
+      }
+  
+      // If no valid attack is possible, end the turn
+      console.log('Opponent cannot attack. Ending turn.');
+      this.endTurn();
+    } else {
+      console.log('It is not the opponent\'s turn.');
     }
-  
-    // Opponent attacks if they have monsters
-    if (this.opponentMonsterCards.length > 0 && this.playerMonsterCards.length > 0) {
-      const attackingCard = this.opponentMonsterCards[0]; // First monster
-      const targetCard = this.playerMonsterCards[0]; // First player's monster
-  
-      this.selectedCard = attackingCard;
-      this.selectedTarget = targetCard;
-  
-      console.log('Opponent attacks with:', attackingCard);
-      this.attack();
-    }
-  
-    // End opponent's turn
-    this.endTurn();
   }
 }
