@@ -1,10 +1,13 @@
 /* === PAGE CONTAINER === */
-.ion-content {
-  background: rgba(20, 20, 20, 0.95); /* Darkened overlay */
+ion-content {
+  --background: rgba(20, 20, 20, 0.95); /* Darkened overlay */
   padding: 20px;
   color: #FFD700; /* Gold text */
   text-align: center;
   animation: fadeIn 0.5s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* === HEADER STYLING === */
@@ -12,16 +15,20 @@ ion-toolbar {
   background: linear-gradient(45deg, #8B0000, #FF4500);
   color: #FFD700;
   text-align: center;
+  box-shadow: 0 0 10px rgba(255, 69, 0, 0.8);
 }
 
 /* === BUTTON STYLING === */
 ion-button {
   --background: #1a1a1a !important; /* Dark background */
   --color: #ffd700 !important; /* Gold text */
-  --border: 2px solid #ffd700 !important; 
+  --border: 2px solid #ffd700 !important;
   --border-radius: 6px;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
   transition: transform 0.2s ease-in-out, box-shadow 0.3s;
+  margin: 10px 0;
+  width: 100%;
+  max-width: 300px; /* Ensure buttons are not too wide */
 }
 
 ion-button:hover {
@@ -31,12 +38,17 @@ ion-button:hover {
   transform: scale(1.05);
 }
 
+ion-button:active {
+  transform: scale(0.95);
+}
+
 /* === SEARCH BAR === */
 ion-item {
   background: rgba(0, 0, 0, 0.6);
   border-radius: 10px;
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
   padding: 10px;
+  margin-bottom: 15px;
 }
 
 ion-input {
@@ -52,24 +64,29 @@ ion-card {
   border-radius: 8px;
   padding: 15px;
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  margin-bottom: 20px;
 }
 
 /* === CARD GRID === */
 ion-card img {
-  width: 65%;
+  width: 100%;
+  max-width: 200px; /* Ensure consistent image size */
   border-radius: 4px;
   border: 2px solid #FFD700;
+  margin: 0 auto;
 }
 
 ion-card-header {
   background: rgba(30, 30, 30, 0.9);
   border-top: 2px solid #FFD700;
+  padding: 10px;
 }
 
 ion-card-title {
   font-size: 18px;
   color: #FFD700;
   text-transform: uppercase;
+  text-align: center;
 }
 
 /* === CARD DETAILS === */
@@ -78,6 +95,28 @@ ion-card-content {
   background: rgba(0, 0, 0, 0.7);
   border-radius: 6px;
   padding: 10px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* === RESPONSIVENESS === */
+@media (max-width: 600px) {
+  ion-button {
+    width: 100%;
+  }
+
+  ion-card img {
+    max-width: 150px; /* Adjust image size for smaller screens */
+  }
+
+  ion-card-title {
+    font-size: 16px;
+  }
+
+  ion-card-content {
+    font-size: 12px;
+  }
 }
 
 /* === FADE-IN EFFECT === */

@@ -47,6 +47,8 @@ export class CardSearchPage {
     this.showFilters = !this.showFilters; // Toggle the visibility of the filter section
   }
 
+  
+
   searchCards(): void {
     if (!this.searchTerm.trim()) {
       this.error = 'Please enter a search term.';
@@ -112,8 +114,8 @@ export class CardSearchPage {
     this.applyFilters();
   }
 
-  toggleCardDetails(card: Card): void {
-    card.showDetails = !card.showDetails;
+  toggleCardDetails(card: any): void {
+    card.showDetails = !card.showDetails; // Toggle the showDetails property
   }
 
   // Go to home page
