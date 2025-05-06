@@ -74,11 +74,20 @@
       <!-- Opponent's Field -->
       <div class="game-area">
         <div class="monster-cards">
-          <div *ngFor="let card of opponentMonsterCards" class="monster-card" [attr.data-card-id]="card.id">
+          <div
+            *ngFor="let card of opponentMonsterCards"
+            class="monster-card"
+            [attr.data-card-id]="card.id"
+          >
             <ion-thumbnail>
-              <img class="card-image" [src]="card?.card_images[0]?.image_url" alt="{{ card?.name }}" />
+              <img
+                class="card-image"
+                [src]="card?.card_images[0]?.image_url"
+                alt="{{ card?.name }}"
+              />
             </ion-thumbnail>
             <ion-label>{{ card?.name }}</ion-label>
+            <ion-button [disabled]="!playerTurn" (click)="selectTarget(card)">Select</ion-button>
           </div>
         </div>
       </div>

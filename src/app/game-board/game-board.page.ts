@@ -31,6 +31,7 @@ export class GameBoardPage implements OnInit {
   explosion: { top: number; left: number } | null = null;
   hasSummonedThisTurn: boolean = false; // New flag to track if a card has been summoned
   randomBoost: { attribute: string; stat: string; percentage: number } | null = null; // Store the random boost with stat
+  hasAttackedThisTurn: boolean = false;
 
   constructor(
     private cardService: CardService,
@@ -326,6 +327,11 @@ export class GameBoardPage implements OnInit {
       console.log('No attacking or target card selected.');
       return;
     }
+    if (this.hasAttackedThisTurn) {
+      alert('You can only attack once per turn!'); // Warning message
+      console.log('You can only attack once per turn.');
+      return;
+    }
   
     const attacker = document.querySelector(`[data-card-id="${this.selectedCard.id}"]`) as HTMLElement;
     const target = document.querySelector(`[data-card-id="${this.selectedTarget.id}"]`) as HTMLElement;
@@ -367,6 +373,7 @@ export class GameBoardPage implements OnInit {
         this.renderer.removeChild(document.body, clonedElement);
         this.triggerExplosion(targetRect);
         this.performAttack();
+        this.hasAttackedThisTurn = true; // Mark that the player has attacked
       },
     });
   }
@@ -408,10 +415,15 @@ export class GameBoardPage implements OnInit {
     console.log('Target DEF:', targetDef);
   
     if (this.playerTurn) {
+      // Player's attack logic
       if (attackerAtk > targetDef) {
         const damage = attackerAtk - targetDef;
         this.opponentLifePoints = Math.max(this.opponentLifePoints - damage, 0); // Prevent negative life points
         console.log(`Opponent loses ${damage} life points.`);
+        this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedTarget);
+      } else if (attackerAtk === targetDef) {
+        console.log('Both cards are destroyed.');
+        this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
         this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedTarget);
       } else {
         const damage = targetDef - attackerAtk;
@@ -420,10 +432,15 @@ export class GameBoardPage implements OnInit {
         this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
       }
     } else {
+      // Opponent's attack logic
       if (attackerAtk > targetDef) {
         const damage = attackerAtk - targetDef;
         this.lifePoints = Math.max(this.lifePoints - damage, 0); // Prevent negative life points
         console.log(`Player loses ${damage} life points.`);
+        this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedTarget);
+      } else if (attackerAtk === targetDef) {
+        console.log('Both cards are destroyed.');
+        this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedCard);
         this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedTarget);
       } else {
         const damage = targetDef - attackerAtk;
@@ -433,8 +450,11 @@ export class GameBoardPage implements OnInit {
       }
     }
   
+    // Reset selected cards after the attack
     this.selectedCard = null;
     this.selectedTarget = null;
+  
+    // Check if the game has ended
     this.checkGameEnd();
   }
 
@@ -461,6 +481,7 @@ export class GameBoardPage implements OnInit {
     this.selectedTarget = null;
     this.phase = 'draw';
     this.hasSummonedThisTurn = false;
+    this.hasAttackedThisTurn = false;
   
     console.log('Turn ended. Next turn:', this.playerTurn ? 'Player' : 'Opponent');
   
@@ -532,14 +553,51 @@ export class GameBoardPage implements OnInit {
   
             console.log('Opponent attacks with:', attackingCard, 'Targeting:', targetCard);
   
-            // Trigger the attack animation
-            this.attack();
+            // Add animation for the opponent's attack
+            const attacker = document.querySelector(`[data-card-id="${attackingCard.id}"]`) as HTMLElement;
+            const target = document.querySelector(`[data-card-id="${targetCard.id}"]`) as HTMLElement;
   
-            // End opponent's turn after the attack
-            setTimeout(() => {
-              console.log('Opponent\'s turn ends after attack.');
-              this.endTurn();
-            }, 1000); // Add a delay to allow the attack animation to complete
+            if (attacker && target) {
+              const attackerRect = attacker.getBoundingClientRect();
+              const targetRect = target.getBoundingClientRect();
+  
+              const deltaX = targetRect.left - attackerRect.left;
+              const deltaY = targetRect.top - attackerRect.top;
+  
+              const clonedElement = this.renderer.createElement('div');
+              this.renderer.setStyle(clonedElement, 'position', 'fixed');
+              this.renderer.setStyle(clonedElement, 'top', `${attackerRect.top}px`);
+              this.renderer.setStyle(clonedElement, 'left', `${attackerRect.left}px`);
+              this.renderer.setStyle(clonedElement, 'width', '120px');
+              this.renderer.setStyle(clonedElement, 'height', '180px');
+              this.renderer.setStyle(clonedElement, 'background-image', `url(${attackingCard.imageUrl})`);
+              this.renderer.setStyle(clonedElement, 'background-size', 'cover');
+              this.renderer.setStyle(clonedElement, 'z-index', '1000');
+              this.renderer.appendChild(document.body, clonedElement);
+  
+              gsap.to(clonedElement, {
+                x: deltaX,
+                y: deltaY,
+                scale: 1.2,
+                duration: 0.6,
+                ease: 'power2.out',
+                onComplete: () => {
+                  console.log('Opponent attack animation completed.');
+                  this.renderer.removeChild(document.body, clonedElement);
+                  this.triggerExplosion(targetRect);
+                  this.performAttack(); // Perform the attack after the animation
+  
+                  // End opponent's turn after the attack
+                  setTimeout(() => {
+                    console.log('Opponent\'s turn ends after attack.');
+                    this.endTurn();
+                  }, 1000);
+                },
+              });
+            } else {
+              console.log('Attacker or target card element not found.');
+              this.endTurn(); // Ensure the turn ends even if animation fails
+            }
             return;
           } else {
             console.log('No valid target found for attack.');
