@@ -32,6 +32,8 @@ export class GameBoardPage implements OnInit {
   hasSummonedThisTurn: boolean = false; // New flag to track if a card has been summoned
   randomBoost: { attribute: string; stat: string; percentage: number } | null = null; // Store the random boost with stat
   hasAttackedThisTurn: boolean = false;
+  errorMessage: string | null = null; // Store the error message
+  discardModalVisible: boolean = false; // Track if the discard modal is visible
 
   constructor(
     private cardService: CardService,
@@ -43,22 +45,47 @@ export class GameBoardPage implements OnInit {
   ngOnInit() {
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras?.state;
-
+  
     if (state) {
       // Normalize the player deck
       this.playerDeck = (state['playerDeck'] || []).map((card: any) => this.normalizeCard(card));
     }
-
+  
     // Fetch and normalize the opponent deck
     this.cardService.getCards().subscribe(cards => {
       this.opponentDeck = this.cardService.getNormalMonsters(cards).map(card => this.normalizeCard(card));
       this.drawInitialCards();
       this.applyRandomBoost();
-
+  
       console.log('Opponent Monster Cards:', this.opponentMonsterCards);
     });
-
+  
     console.log('Normalized Player Deck:', this.playerDeck);
+  
+    // Add a keyboard event listener for the TAB key
+    window.addEventListener('keydown', this.handleKeyPress.bind(this));
+  }
+  
+  ngOnDestroy() {
+    // Remove the keyboard event listener when the component is destroyed
+    window.removeEventListener('keydown', this.handleKeyPress.bind(this));
+  }
+  
+  handleKeyPress(event: KeyboardEvent) {
+    if (event.key === 'Tab') {
+      event.preventDefault(); // Prevent the default browser behavior for TAB
+      this.nextPhase(); // Call the method to switch to the next phase
+    }
+  }
+
+  // Method to display an error message
+  showError(message: string) {
+    this.errorMessage = message;
+  }
+
+  // Method to clear the error message
+  clearErrorMessage() {
+    this.errorMessage = null;
   }
 
   normalizeCard(card: any): any {
@@ -123,7 +150,7 @@ export class GameBoardPage implements OnInit {
   
     // Check hand limits after the initial draw
     if (this.playerHand.length > 7) {
-      alert('Your hand is full! Please discard a card.');
+      this.showError('⚠️ Your hand is full! Please discard a card to continue.');
       this.promptPlayerToDiscard();
     }
   
@@ -146,17 +173,18 @@ export class GameBoardPage implements OnInit {
   }
 
   promptPlayerToDiscard(): void {
-    const discardableCards = this.playerHand.map((card, index) => `${index + 1}: ${card.name}`).join('\n');
-    const choice = prompt(`Your hand is full. Choose a card to discard:\n${discardableCards}`);
-  
-    const cardIndex = parseInt(choice || '', 10) - 1;
-    if (!isNaN(cardIndex) && cardIndex >= 0 && cardIndex < this.playerHand.length) {
-      const cardToDiscard = this.playerHand[cardIndex];
-      this.discardCard(cardToDiscard, true);
-    } else {
-      alert('Invalid choice. Please try again.');
-      this.promptPlayerToDiscard();
-    }
+    this.discardModalVisible = true;
+  }
+
+  // Close the discard modal
+  closeDiscardModal(): void {
+    this.discardModalVisible = false;
+  }
+
+  // Discard a card from the modal
+  discardCardFromModal(card: any): void {
+    this.discardCard(card, true); // Discard the selected card
+    this.closeDiscardModal(); // Close the modal
   }
 
   discardRandomCard(isPlayer: boolean): void {
@@ -181,7 +209,6 @@ export class GameBoardPage implements OnInit {
   
         // Check if the player's hand exceeds the limit
         if (this.playerHand.length > 7) {
-          alert('Your hand is full! Please discard a card.');
           this.promptPlayerToDiscard();
         }
       }
@@ -193,6 +220,7 @@ export class GameBoardPage implements OnInit {
   
         // Check if the opponent's hand exceeds the limit
         if (this.opponentHand.length > 7) {
+          console.log('⚠️ Opponent\'s hand is full! Discarding a random card.');
           this.discardRandomCard(false);
         }
       }
@@ -279,56 +307,50 @@ export class GameBoardPage implements OnInit {
   playCard(card: any) {
     console.log('Current Phase:', this.phase);
     if (this.phase !== 'main') {
-      alert('You can only play cards during the Main Phase!');
+      this.showError('⚠️ You can only play cards during the Main Phase! Please wait for the correct phase.');
       return;
     }
-  
+
     if (this.hasSummonedThisTurn) {
-      alert('You can only summon one card per turn!');
+      this.showError('⚠️ You can only summon one card per turn! Try again next turn.');
       return;
     }
-  
+
     if (this.playerTurn) {
-      // Check if the player's field has reached the limit
       if (this.playerMonsterCards.length >= 5) {
-        alert('You cannot summon more than 5 cards on the field!');
+        this.showError('⚠️ Your field is full! You cannot summon more than 5 cards.');
         return;
       }
-  
+
       console.log('Playing card:', card);
       this.summonCard(card, true);
       this.playerHand = this.playerHand.filter(c => c !== card);
     } else {
-      // Check if the opponent's field has reached the limit
       if (this.opponentMonsterCards.length >= 5) {
-        alert('Opponent cannot summon more than 5 cards on the field!');
+        this.showError('⚠️ Opponent\'s field is full! They cannot summon more than 5 cards.');
         return;
       }
-  
+
       console.log('Opponent plays card:', card);
       this.summonCard(card, false);
-  
-      // Update the opponent's hand and trigger change detection
-      const updatedHand = this.opponentHand.filter(c => c !== card);
-      this.opponentHand = [...updatedHand]; // Reassign to trigger Angular's change detection
+      this.opponentHand = [...this.opponentHand.filter(c => c !== card)];
     }
-  
+
     this.selectedCard = null;
     this.hasSummonedThisTurn = true;
   }
 
   attack() {
     if (this.phase !== 'battle') {
-      console.log('Attack can only be performed during the Battle Phase.');
+      this.showError('⚠️ You can only attack during the Battle Phase! Wait for the correct phase.');
       return;
     }
     if (!this.selectedCard || !this.selectedTarget) {
-      console.log('No attacking or target card selected.');
+      this.showError('⚠️ Please select both an attacking card and a target card before attacking.');
       return;
     }
     if (this.hasAttackedThisTurn) {
-      alert('You can only attack once per turn!'); // Warning message
-      console.log('You can only attack once per turn.');
+      this.showError('⚠️ You can only attack once per turn! Try again next turn.');
       return;
     }
   

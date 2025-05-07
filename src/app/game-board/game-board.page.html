@@ -1,4 +1,24 @@
 <ion-content>
+  <!-- Custom Error Message Modal -->
+  <div *ngIf="errorMessage" class="custom-error-modal">
+    <div class="modal-content">
+      <p>{{ errorMessage }}</p>
+      <ion-button (click)="clearErrorMessage()">OK</ion-button>
+    </div>
+  </div>
+
+  <div *ngIf="discardModalVisible" class="custom-discard-modal">
+    <div class="modal-content">
+      <p>Your hand is full. Choose a card to discard:</p>
+      <ul>
+        <li *ngFor="let card of playerHand; let i = index" (click)="discardCardFromModal(card)">
+          {{ i + 1 }}: {{ card.name }}
+        </li>
+      </ul>
+      <ion-button (click)="closeDiscardModal()">Cancel</ion-button>
+    </div>
+  </div>
+
   <!-- Attack Animation Overlay -->
   <div
     *ngIf="clonedCard"
@@ -46,8 +66,8 @@
       <!-- Game Controls -->
       <div class="game-controls">
         <div>
-      <!-- Disable buttons when it's not the player's turn -->
-      <ion-button [disabled]="!playerTurn" (click)="nextPhase()">Next Phase</ion-button>        
+          <!-- Disable buttons when it's not the player's turn -->
+          <ion-button [disabled]="!playerTurn" (click)="nextPhase()">Next Phase</ion-button>
         </div>
       </div>
 
