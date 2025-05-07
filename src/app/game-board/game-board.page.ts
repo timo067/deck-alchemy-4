@@ -72,7 +72,14 @@ export class GameBoardPage implements OnInit {
   }
   
   handleKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Tab') {
+    if (this.discardModalVisible) {
+      const key = parseInt(event.key, 10);
+      if (!isNaN(key) && key >= 1 && key <= this.playerHand.length) {
+        // Select the card corresponding to the pressed number
+        const cardToDiscard = this.playerHand[key - 1];
+        this.discardCardFromModal(cardToDiscard);
+      }
+    } else if (event.key === 'Tab') {
       event.preventDefault(); // Prevent the default browser behavior for TAB
       this.nextPhase(); // Call the method to switch to the next phase
     }
