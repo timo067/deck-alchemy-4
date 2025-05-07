@@ -24,7 +24,7 @@ export class GameBoardPage implements OnInit {
   duelResult: string = '';
   playerTurn: boolean = true;
   phase: string = 'draw';
-  background: string = 'default.jpg'; // Fallback background
+  background: string = 'ChatGPT Image May 7, 2025, 11_05_23 PM.png'; // Fallback background
   clonedCard: { top: number; left: number; image: string, transformStyle: string } | null = null;
   clonedCardAnimating: boolean = false;
   transformStyle: string = '';
@@ -47,12 +47,7 @@ export class GameBoardPage implements OnInit {
     if (state) {
       // Normalize the player deck
       this.playerDeck = (state['playerDeck'] || []).map((card: any) => this.normalizeCard(card));
-      this.background = state['background']
-        ? `assets/images/${state['background']}`
-        : 'assets/images/Blue Eyes White Dragon.jpg'; // Default background
     }
-
-    console.log("Selected Background:", this.background);
 
     // Fetch and normalize the opponent deck
     this.cardService.getCards().subscribe(cards => {
@@ -93,26 +88,27 @@ export class GameBoardPage implements OnInit {
   applyRandomBoost() {
     const attributes = ['Wind', 'Dark', 'Fire', 'Water', 'Earth', 'Light'];
     const stats = ['atk', 'def'];
-
+  
     const randomAttribute = attributes[Math.floor(Math.random() * attributes.length)];
     const randomStat = stats[Math.floor(Math.random() * stats.length)];
     const randomPercentage = Math.floor(Math.random() * 21) + 10;
-
+  
     this.randomBoost = { attribute: randomAttribute, stat: randomStat, percentage: randomPercentage };
-
+  
     console.log(`Random Boost: ${randomAttribute} ${randomStat.toUpperCase()} +${randomPercentage}%`);
-
+  
+    // Normalize the attribute comparison to avoid case sensitivity issues
     this.playerDeck.forEach(card => {
-      if (card.attribute === randomAttribute) {
+      if (card.attribute?.toLowerCase() === randomAttribute.toLowerCase()) {
         card[randomStat] = Math.floor(card[randomStat] * (1 + randomPercentage / 100));
         card.isBoosted = true;
       } else {
         card.isBoosted = false;
       }
     });
-
+  
     this.opponentDeck.forEach(card => {
-      if (card.attribute === randomAttribute) {
+      if (card.attribute?.toLowerCase() === randomAttribute.toLowerCase()) {
         card[randomStat] = Math.floor(card[randomStat] * (1 + randomPercentage / 100));
         card.isBoosted = true;
       } else {
@@ -311,7 +307,10 @@ export class GameBoardPage implements OnInit {
   
       console.log('Opponent plays card:', card);
       this.summonCard(card, false);
-      this.opponentHand = this.opponentHand.filter(c => c !== card);
+  
+      // Update the opponent's hand and trigger change detection
+      const updatedHand = this.opponentHand.filter(c => c !== card);
+      this.opponentHand = [...updatedHand]; // Reassign to trigger Angular's change detection
     }
   
     this.selectedCard = null;
@@ -604,7 +603,7 @@ export class GameBoardPage implements OnInit {
           }
         } else {
           console.log('No valid attacking card found.');
-        }
+        } 
       } else {
         console.log('Opponent cannot attack. No monsters available.');
       }

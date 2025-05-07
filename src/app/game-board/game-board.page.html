@@ -109,7 +109,6 @@
               />
             </ion-thumbnail>
             <ion-label>{{ card?.name || 'Unknown Card' }}</ion-label>
-            <p *ngIf="card.isBoosted">🔥 Boosted!</p>
             <ion-button [disabled]="!playerTurn" (click)="selectCard(card)">Select</ion-button>
           </div>
         </div>
@@ -128,7 +127,6 @@
               [src]="card?.imageUrl || 'assets/images/default-card.jpg'"
               alt="{{ card?.name || 'Unknown Card' }}"
             />
-            <p *ngIf="card.isBoosted">🔥 Boosted!</p>
             <ion-button [disabled]="!playerTurn" (click)="playCard(card)">Play</ion-button>
           </div>
         </div>
