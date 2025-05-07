@@ -83,6 +83,9 @@ export class GameBoardPage implements OnInit {
       event.preventDefault(); // Prevent the default browser behavior for TAB
       this.nextPhase(); // Call the method to switch to the next phase
     }
+    else if (event.key === 'Enter') {
+      this.clearErrorMessage(); // Clear the error message when Enter is pressed
+    }
   }
 
   // Method to display an error message
