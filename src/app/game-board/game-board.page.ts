@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CardService } from '../services/card.service';
 import { Renderer2 } from '@angular/core';
 import { gsap } from 'gsap';
+import { delay, of } from 'rxjs';
 
 @Component({
   selector: 'app-game-board',
@@ -491,14 +492,16 @@ export class GameBoardPage implements OnInit {
 
   checkGameEnd() {
     if (this.lifePoints <= 0) {
-      this.duelResult = 'You lose!';
-      alert(this.duelResult);
-      this.router.navigate(['default']);
+      this.showError('⚠️ You lose! Your life points are at 0.');
+      of(null).pipe(delay(2000)).subscribe(() => {
+        this.router.navigate(['default']);
+      });
     } else if (this.opponentLifePoints <= 0) {
-      this.duelResult = 'You win!';
-      alert(this.duelResult);
+      this.showError('🎉 You win! Opponent\'s life points are at 0.');
+      of(null).pipe(delay(2000)).subscribe(() => {
       this.router.navigate(['default']);
-    }
+    });
+   }
   }
 
   endTurn() {
