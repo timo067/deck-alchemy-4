@@ -3,10 +3,10 @@
   color: white;
   text-align: center;
   height: 100vh;
-  background-image: url('/assets/images/BChatGPT Image May 7, 2025, 11_05_23 PM.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-image: url('/assets/images/BackGround.png'); /* Path to the saved image */
+  background-size: cover; /* Ensure the background covers the entire area */
+  background-position: center; /* Center the background image */
+  background-repeat: no-repeat; /* Prevent the background from repeating */
 
   .sidebar {
     width: 250px;
