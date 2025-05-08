@@ -11,6 +11,91 @@
   .sidebar {
     width: 250px;
     height: 100vh;
+    padding: 20px;
+    border-radius: 8px;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    .sidebar h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    color: #ffd700; /* Gold color for the title */
+    margin-bottom: 20px;
+  }
+
+    .score p,
+    .turn-indicator p,
+    .battle-actions p
+    {
+      font-size: 1rem;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .score p strong,
+    .turn-indicator p strong,
+    .battle-actions p strong
+     {
+      margin-left: 5px;
+      color: #ffd700; /* Gold for emphasis */
+    }
+
+    .icon-life {
+      color: #f44336; /* Red for life points */
+      margin-right: 8px;
+    }
+
+    .icon-turn {
+      color: #4caf50; /* Green for turn indicators */
+      margin-right: 8px;
+    }
+
+    .icon-action {
+      color: #2196f3; /* Blue for actions */
+      margin-right: 8px;
+    }
+
+    .icon-boost {
+      color: #ff9800; /* Orange for boosts */
+      margin-right: 8px;
+    }
+
+    .game-controls ion-button {
+      margin-top: 20px;
+    }
+
+    .deck-visualization {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .deck-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .deck-image {
+      width: 120px;
+      height: 160px;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s ease;
+    }
+
+    .deck-image:hover {
+      transform: scale(1.1);
+    }
+
+    .deck-info p {
+      margin-top: 8px;
+      font-size: 1rem;
+      color: #fff;
+      font-weight: bold;
+    }
     
     .game-controls button {
       background-color: #0066ff;
@@ -249,7 +334,6 @@ ion-content {
     }
   }
 
-    /* filepath: e:\Github\deck-alchemy-4\src\app\game-board\game-board.page.scss */
   .deck-visualization {
     position: absolute;
     bottom: 20px;
@@ -351,4 +435,17 @@ ion-content {
 .dialog-actions button:last-child:hover {
   background-color: #d32f2f; /* Darker red on hover */
   transform: scale(1.05); /* Slight zoom effect */
+}
+
+.deck-image {
+  width: 120px; /* Smaller width */
+  height: 160px; /* Smaller height */
+  object-fit: contain; /* Ensure the image fits within the dimensions */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.deck-image:hover {
+  transform: scale(1.1); /* Slight zoom effect on hover */
 }
