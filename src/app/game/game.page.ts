@@ -18,6 +18,7 @@ export class GamePage implements OnInit {
   playerStarts: boolean | null = null;
   searchTerm: string = '';
   searchResults: any[] = [];
+  duelHistory: { result: string; date: Date }[] = []; // Store win/loss history
 
   constructor(
     private cardService: CardService,
@@ -26,17 +27,44 @@ export class GamePage implements OnInit {
   ) {}
 
   ngOnInit() {
-    const savedActiveDeck = localStorage.getItem('activeDeck');
-    if (savedActiveDeck) {
-      this.playerDeck = JSON.parse(savedActiveDeck); // Set the active deck as the player deck
-      console.log('Active deck loaded for the game:', this.playerDeck);
-    } else {
-      alert('No active deck is set. Please select a deck in the Deck List page.');
-    }
-  
-    this.initializeEnemyDeck();
-    this.coinFlip();
+  const savedActiveDeck = localStorage.getItem('activeDeck');
+  if (savedActiveDeck) {
+    this.playerDeck = JSON.parse(savedActiveDeck);
+    console.log('Active deck loaded for the game:', this.playerDeck);
+  } else {
+    alert('No active deck is set. Please select a deck in the Deck List page.');
   }
+
+  this.initializeEnemyDeck();
+  this.coinFlip();
+
+  // Restore duel history from localStorage
+  const savedHistory = localStorage.getItem('duelHistory');
+  if (savedHistory) {
+    this.duelHistory = JSON.parse(savedHistory); // Load the full history
+  }
+
+  // Check for duel result in Router state
+  const navigation = this.router.getCurrentNavigation();
+  const state = navigation?.extras.state as { duelResult?: string };
+  if (state?.duelResult) {
+    // Add the new result to the history
+    this.duelHistory = [
+      ...this.duelHistory,
+      { result: state.duelResult, date: new Date() }
+    ];
+
+    // Keep only the last 5 duels
+    if (this.duelHistory.length > 5) {
+      this.duelHistory = this.duelHistory.slice(-5);
+    }
+
+    console.log('Duel result recorded:', state.duelResult);
+
+    // Save updated history to localStorage
+    localStorage.setItem('duelHistory', JSON.stringify(this.duelHistory));
+  }
+}
 
   async loadPlayerDeck() {
     try {

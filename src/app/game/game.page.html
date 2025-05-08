@@ -28,13 +28,14 @@
     </ion-card-content>
   </ion-card>  
 
-  <!-- Background Selection -->
-  <ion-select [(ngModel)]="selectedBackground" (ionChange)="changeBackground(selectedBackground)">
-    <ion-select-option value="Blue Eyes White Dragon.jpg">Blue Eyes White Dragon</ion-select-option>
-    <ion-select-option value="Magicians.jpg">Magicians</ion-select-option>
-    <ion-select-option value="shaddoll.webp">Shaddoll</ion-select-option>
-    <ion-select-option value="Sky Striker.webp">Sky Striker</ion-select-option>
-  </ion-select>
+    <div class="duel-history">
+    <h3>Duel History (Last 5)</h3>
+    <ul>
+      <li *ngFor="let record of duelHistory">
+        {{ record.date | date: 'short' }} - {{ record.result }}
+      </li>
+    </ul>
+  </div>
   
   <ion-button expand="full" (click)="simulateDuel()">Let's Duel</ion-button>
 </ion-content>
