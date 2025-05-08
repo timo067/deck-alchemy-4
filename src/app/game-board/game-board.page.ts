@@ -35,6 +35,9 @@ export class GameBoardPage implements OnInit {
   hasAttackedThisTurn: boolean = false;
   errorMessage: string | null = null; // Store the error message
   discardModalVisible: boolean = false; // Track if the discard modal is visible
+  confirmDialogVisible: boolean = false; // Track if the dialog is visible
+  confirmMessage: string = ''; // Message to display in the dialog
+  confirmCallback: ((result: boolean) => void) | null = null; // Callback for handling the result
 
   constructor(
     private cardService: CardService,
@@ -86,6 +89,7 @@ export class GameBoardPage implements OnInit {
     }
     else if (event.key === 'Enter') {
       this.clearErrorMessage(); // Clear the error message when Enter is pressed
+      this.handleConfirm(true); // Simulate confirming the dialog
     }
   }
 
@@ -97,6 +101,22 @@ export class GameBoardPage implements OnInit {
   // Method to clear the error message
   clearErrorMessage() {
     this.errorMessage = null;
+  }
+
+  // Show the custom confirmation dialog
+  showConfirmDialog(message: string, callback: (result: boolean) => void) {
+    this.confirmMessage = message;
+    this.confirmCallback = callback;
+    this.confirmDialogVisible = true;
+  }
+
+  // Handle the user's response
+  handleConfirm(result: boolean) {
+    this.confirmDialogVisible = false;
+    if (this.confirmCallback) {
+      this.confirmCallback(result);
+      this.clearErrorMessage(); // Clear the error message when the dialog is closed
+    }
   }
 
   normalizeCard(card: any): any {
@@ -206,9 +226,33 @@ export class GameBoardPage implements OnInit {
     }
   }
 
+  onDeckClick() {
+    this.showConfirmDialog('Do you want to surrender?', (confirm) => {
+      if (confirm) {
+        this.surrender();
+      }
+    });
+  }
+
+  surrender() {
+    this.showConfirmDialog('⚠️ You surrendered! The opponent wins. Press OK to return to the game.', (confirm) => {
+      if (confirm) {
+        this.router.navigate(['/game'], {
+          state: { duelResult: 'Loss' } // Pass the result back to GamePage
+        });
+      }
+    });
+  }
+
   drawCards(deck: any[], count: number): any[] {
     const shuffledDeck = [...deck].sort(() => 0.5 - Math.random());
-    return shuffledDeck.slice(0, count);
+    const drawnCards = shuffledDeck.slice(0, count); // Get the drawn cards
+    deck.splice(0, count); // Remove the drawn cards from the original deck
+    if (deck.length < count) {
+      this.showError('⚠️ Not enough cards in the deck to draw!');
+      return []; // Return an empty array if not enough cards
+    }
+    return drawnCards;
   }
 
   drawCard() {

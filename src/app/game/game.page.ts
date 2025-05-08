@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CardService } from '../services/card.service';
 import { PlayerDeckService } from '../services/playerdeck.service';
 import { Router } from '@angular/router';
+import { ChangeDetectorRef } from '@angular/core'; // Import ChangeDetectorRef
 
 @Component({
   selector: 'app-game',
@@ -23,7 +24,8 @@ export class GamePage implements OnInit {
   constructor(
     private cardService: CardService,
     private playerDeckService: PlayerDeckService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef // Inject ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -63,6 +65,9 @@ export class GamePage implements OnInit {
 
     // Save updated history to localStorage
     localStorage.setItem('duelHistory', JSON.stringify(this.duelHistory));
+
+     // Trigger change detection
+      this.cdr.detectChanges();
   }
 }
 

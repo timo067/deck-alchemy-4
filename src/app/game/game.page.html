@@ -29,13 +29,16 @@
   </ion-card>  
 
     <div class="duel-history">
-    <h3>Duel History (Last 5)</h3>
-    <ul>
-      <li *ngFor="let record of duelHistory">
-        {{ record.date | date: 'short' }} - {{ record.result }}
-      </li>
-    </ul>
-  </div>
+  <h3>Duel History (Last 5)</h3>
+  <ul>
+    <li *ngFor="let record of duelHistory">
+      <span>{{ record.date | date: 'short' }}</span>
+      <span [ngClass]="{'result-win': record.result === 'Win', 'result-loss': record.result === 'Loss'}">
+        {{ record.result }}
+      </span>
+    </li>
+  </ul>
+</div>
   
   <ion-button expand="full" (click)="simulateDuel()">Let's Duel</ion-button>
 </ion-content>

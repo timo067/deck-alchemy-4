@@ -19,6 +19,16 @@
     </div>
   </div>
 
+    <div *ngIf="confirmDialogVisible" class="custom-confirm-dialog">
+    <div class="dialog-content">
+      <p>{{ confirmMessage }}</p>
+      <div class="dialog-actions">
+        <button (click)="handleConfirm(true)">OK</button>
+        <button (click)="handleConfirm(false)">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Attack Animation Overlay -->
   <div
     *ngIf="clonedCard"
@@ -77,6 +87,14 @@
           🎉 Random Boost: Cards with the <strong>{{ randomBoost.attribute }}</strong> attribute have their stats increased by <strong>{{ randomBoost.percentage }}%</strong>!
         </p>
       </div>
+
+      <div class="deck-visualization">
+        <div class="deck-info" (click)="onDeckClick()">
+          <img src="assets/images/deck-back.png" alt="Deck" class="deck-image" />
+          <p>{{ playerDeck.length }} cards left</p>
+        </div>
+      </div>
+
     </div>
 
     <div class="game-content">
