@@ -38,7 +38,7 @@ const routes: Routes = [
   {
     path: 'deck-list',
     loadChildren: () => import('./deck-list/deck-list.module').then( m => m.DeckListPageModule)
-  },
+  }
 ];
 
 @NgModule({

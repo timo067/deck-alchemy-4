@@ -59,4 +59,44 @@ export class PlayerDeckService {
       throw new Error('Failed to fetch player deck. Please ensure you are logged in.');
     }
   }
+
+  // Save duel history to Firestore
+  async saveDuelHistory(duelHistory: any[]): Promise<void> {
+    try {
+      const userId = await this.authService.getUserId();
+      if (!userId) {
+        throw new Error('User ID is missing. Please log in again.');
+      }
+
+      const historyRef = doc(collection(this.firestore, 'userDecks'), userId);
+      await setDoc(historyRef, { duelHistory });
+
+      console.log(`Duel history saved successfully for user: ${userId}`);
+    } catch (error) {
+      console.error('Error saving duel history:', error);
+      throw new Error('Failed to save duel history.');
+    }
+  }
+
+  // Fetch duel history from Firestore
+  async getDuelHistory(): Promise<any[]> {
+    try {
+      const userId = await this.authService.getUserId();
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
+      const historyRef = doc(this.firestore, 'userDecks', userId);
+      const historyDoc = await getDoc(historyRef);
+
+      if (historyDoc.exists()) {
+        return historyDoc.data()['duelHistory'] || [];
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching duel history:', error);
+      throw new Error('Failed to fetch duel history. Please ensure you are logged in.');
+    }
+  }
 }

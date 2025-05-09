@@ -40,7 +40,8 @@ export class GameBoardPage implements OnInit {
   confirmCallback: ((result: boolean) => void) | null = null; // Callback for handling the result
   graveyard: any[] = []; // Array to store cards in the graveyard
   graveyardModalVisible: boolean = false; // Track if the graveyard modal is visible
-
+  playerGraveyard: any[] = []; // Player's graveyard
+  opponentGraveyard: any[] = []; // Opponent's graveyard
 
 
   constructor(
@@ -187,6 +188,16 @@ export class GameBoardPage implements OnInit {
         card.isBoosted = false;
       }
     });
+  }
+
+  // Add a card to the graveyard
+  addToGraveyard(card: any, isPlayer: boolean) {
+    if (isPlayer) {
+      this.playerGraveyard.push(card);
+    } else {
+      this.opponentGraveyard.push(card);
+    }
+    this.graveyard.push(card); // Add to the combined graveyard for tracking
   }
 
   drawInitialCards() {
@@ -500,78 +511,78 @@ export class GameBoardPage implements OnInit {
   }
 
   performAttack() {
-  const attackerAtk = this.selectedCard?.atk || 0; // Ensure attack points are valid
-  const targetDef = this.selectedTarget?.def || 0; // Ensure defense points are valid
+    const attackerAtk = this.selectedCard?.atk || 0; // Ensure attack points are valid
+    const targetDef = this.selectedTarget?.def || 0; // Ensure defense points are valid
 
-  console.log('Performing attack...');
-  console.log('Attacker ATK:', attackerAtk);
-  console.log('Target DEF:', targetDef);
+    console.log('Performing attack...');
+    console.log('Attacker ATK:', attackerAtk);
+    console.log('Target DEF:', targetDef);
 
-  if (this.playerTurn) {
-    // Player's attack logic
-    if (attackerAtk > targetDef) {
-      const damage = attackerAtk - targetDef;
-      this.opponentLifePoints = Math.max(this.opponentLifePoints - damage, 0); // Prevent negative life points
-      console.log(`Opponent loses ${damage} life points.`);
+    if (this.playerTurn) {
+      // Player's attack logic
+      if (attackerAtk > targetDef) {
+        const damage = attackerAtk - targetDef;
+        this.opponentLifePoints = Math.max(this.opponentLifePoints - damage, 0); // Prevent negative life points
+        console.log(`Opponent loses ${damage} life points.`);
 
-      // Send the defeated opponent's card to the graveyard
-      this.graveyard.push(this.selectedTarget);
-      this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedTarget);
-    } else if (attackerAtk === targetDef) {
-      console.log('Both cards are destroyed.');
+        // Send the defeated opponent's card to the graveyard
+        this.addToGraveyard(this.selectedTarget, false);
+        this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedTarget);
+      } else if (attackerAtk === targetDef) {
+        console.log('Both cards are destroyed.');
 
-      // Send both cards to the graveyard
-      this.graveyard.push(this.selectedCard);
-      this.graveyard.push(this.selectedTarget);
+        // Send both cards to the graveyard
+        this.addToGraveyard(this.selectedCard, true);
+        this.addToGraveyard(this.selectedTarget, false);
 
-      this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
-      this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedTarget);
-    } else {
-      const damage = targetDef - attackerAtk;
-      this.lifePoints = Math.max(this.lifePoints - damage, 0); // Prevent negative life points
-      console.log(`Player loses ${damage} life points.`);
+        this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
+        this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedTarget);
+      } else {
+        const damage = targetDef - attackerAtk;
+        this.lifePoints = Math.max(this.lifePoints - damage, 0); // Prevent negative life points
+        console.log(`Player loses ${damage} life points.`);
 
-      // Send the player's defeated card to the graveyard
-      this.graveyard.push(this.selectedCard);
-      this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
-    }
+        // Send the player's defeated card to the graveyard
+        this.addToGraveyard(this.selectedCard, true);
+        this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedCard);
+      }
   } else {
-    // Opponent's attack logic
-    if (attackerAtk > targetDef) {
-      const damage = attackerAtk - targetDef;
-      this.lifePoints = Math.max(this.lifePoints - damage, 0); // Prevent negative life points
-      console.log(`Player loses ${damage} life points.`);
+      // Opponent's attack logic
+      if (attackerAtk > targetDef) {
+        const damage = attackerAtk - targetDef;
+        this.lifePoints = Math.max(this.lifePoints - damage, 0); // Prevent negative life points
+        console.log(`Player loses ${damage} life points.`);
 
-      // Send the player's defeated card to the graveyard
-      this.graveyard.push(this.selectedTarget);
-      this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedTarget);
-    } else if (attackerAtk === targetDef) {
-      console.log('Both cards are destroyed.');
+        // Send the player's defeated card to the graveyard
+        this.addToGraveyard(this.selectedTarget, true);
+        this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedTarget);
+      } else if (attackerAtk === targetDef) {
+        console.log('Both cards are destroyed.');
 
-      // Send both cards to the graveyard
-      this.graveyard.push(this.selectedCard);
-      this.graveyard.push(this.selectedTarget);
+        // Send both cards to the graveyard
+        this.addToGraveyard(this.selectedCard, false);
+        this.addToGraveyard(this.selectedTarget, true);
 
-      this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedCard);
-      this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedTarget);
-    } else {
-      const damage = targetDef - attackerAtk;
-      this.opponentLifePoints = Math.max(this.opponentLifePoints - damage, 0); // Prevent negative life points
-      console.log(`Opponent loses ${damage} life points.`);
+        this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedCard);
+        this.playerMonsterCards = this.playerMonsterCards.filter(c => c !== this.selectedTarget);
+      } else {
+        const damage = targetDef - attackerAtk;
+        this.opponentLifePoints = Math.max(this.opponentLifePoints - damage, 0); // Prevent negative life points
+        console.log(`Opponent loses ${damage} life points.`);
 
-      // Send the opponent's defeated card to the graveyard
-      this.graveyard.push(this.selectedCard);
-      this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedCard);
+        // Send the opponent's defeated card to the graveyard
+        this.addToGraveyard(this.selectedCard, false);
+        this.opponentMonsterCards = this.opponentMonsterCards.filter(c => c !== this.selectedCard);
+      }
     }
+
+    // Reset selected cards after the attack
+    this.selectedCard = null;
+    this.selectedTarget = null;
+
+    // Check if the game has ended
+    this.checkGameEnd();
   }
-
-  // Reset selected cards after the attack
-  this.selectedCard = null;
-  this.selectedTarget = null;
-
-  // Check if the game has ended
-  this.checkGameEnd();
-}
 
   checkGameEnd() {
   if (this.lifePoints <= 0) {

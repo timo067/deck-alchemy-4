@@ -116,24 +116,41 @@
     </div>
 
       <!-- Graveyard Section -->
-    <div class="graveyard" (click)="showGraveyard()">
-      <h3>Graveyard</h3>
-      <p>{{ graveyard.length }} cards</p> <!-- Show the number of cards in the graveyard -->
-    </div>
+<div class="graveyard" (click)="showGraveyard()">
+  <h3>Graveyard</h3>
+  <p>Total: {{ graveyard.length }} cards</p> <!-- Show the total number of cards in the graveyard -->
+</div>
 
-    <!-- Graveyard Modal -->
-    <div *ngIf="graveyardModalVisible" class="graveyard-modal">
-      <div class="modal-content">
-        <h3>Graveyard</h3>
+<!-- Graveyard Modal -->
+<div *ngIf="graveyardModalVisible" class="graveyard-modal">
+  <div class="modal-content">
+    <h3>Graveyard</h3>
+    <div class="modal-graveyard">
+      <!-- Player's Graveyard -->
+      <div class="player-graveyard">
+        <h4>Player's Cards</h4>
         <div class="modal-cards">
-          <div *ngFor="let card of graveyard" class="modal-card">
+          <div *ngFor="let card of playerGraveyard" class="modal-card">
             <img [src]="card.imageUrl" [alt]="card.name" class="modal-card-image" />
             <p>{{ card.name }}</p>
           </div>
         </div>
-        <button class="close-button" (click)="closeGraveyard()">Close</button>
+      </div>
+
+      <!-- Opponent's Graveyard -->
+      <div class="opponent-graveyard">
+        <h4>Opponent's Cards</h4>
+        <div class="modal-cards">
+          <div *ngFor="let card of opponentGraveyard" class="modal-card">
+            <img [src]="card.imageUrl" [alt]="card.name" class="modal-card-image" />
+            <p>{{ card.name }}</p>
+          </div>
+        </div>
       </div>
     </div>
+    <button class="close-button" (click)="closeGraveyard()">Close</button>
+  </div>
+</div>
   </div>
 
     <div class="game-content">
