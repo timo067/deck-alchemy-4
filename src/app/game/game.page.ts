@@ -241,7 +241,7 @@ export class GamePage implements OnInit {
   simulateDuel() {
     if (this.playerDeck.cards.length < 40) {
       alert('Player deck must have 40 cards.');
-      return;
+      return
     }
     
     // Navigate to the GameBoardPage
