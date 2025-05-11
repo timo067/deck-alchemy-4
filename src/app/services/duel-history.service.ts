@@ -12,34 +12,34 @@ export class DuelHistoryService {
 
   constructor(private authService: AuthService) {}
 
-  // Save duel history to Firestore
-      async saveDuelResult(duelResult: { result: string; date: Date }): Promise<void> {
+  // Save a duel result to Firestore
+  async saveDuelResult(duelResult: { result: string; date: Date }): Promise<void> {
   try {
-    const userId = await this.authService.getUserId(); // Get the authenticated user's ID
+    const userId = await this.authService.getUserId();
     console.log('Saving duel result for user ID:', userId); // Debugging
     if (!userId) {
       throw new Error('User ID is missing. Please log in again.');
     }
 
-    const historyRef = doc(this.firestore, 'duelHistory', userId); // Reference to the user's duel history document
+    const historyRef = doc(this.firestore, 'duelHistory', userId);
+    console.log('Firestore document reference:', historyRef); // Debugging
+
     const historyDoc = await getDoc(historyRef);
+    console.log('Existing duel history document:', historyDoc.data()); // Debugging
 
     let duelHistory = [];
     if (historyDoc.exists()) {
       duelHistory = historyDoc.data()['duelHistory'] || [];
     }
 
-    // Add the new duel result to the history
     duelHistory.push(duelResult);
 
-    // Keep only the last 5 duels
     if (duelHistory.length > 5) {
       duelHistory = duelHistory.slice(-5);
     }
 
-    // Save the updated duel history back to Firestore
-    await setDoc(historyRef, { duelHistory }, { merge: true }); // Use merge to avoid overwriting
-    console.log(`Duel history updated successfully for user: ${userId}`);
+    await setDoc(historyRef, { duelHistory }, { merge: true });
+    console.log('Duel history saved successfully:', duelHistory); // Debugging
   } catch (error) {
     console.error('Error saving duel history:', error);
     throw new Error('Failed to save duel history.');
@@ -50,7 +50,6 @@ export class DuelHistoryService {
   async getDuelHistory(): Promise<{ result: string; date: Date }[]> {
     try {
       const userId = await this.authService.getUserId(); // Get the authenticated user's ID
-      console.log('Fetching duel history for user ID:', userId); // Debugging
       if (!userId) {
         throw new Error('User not authenticated');
       }
@@ -60,8 +59,13 @@ export class DuelHistoryService {
 
       if (historyDoc.exists()) {
         const duelHistory = historyDoc.data()['duelHistory'] || [];
-        console.log('Fetched Duel History:', duelHistory); // Debugging
-        return duelHistory;
+        // Convert Firestore Timestamps to JavaScript Dates
+        const convertedHistory = duelHistory.map((record: any) => ({
+          result: record.result,
+          date: record.date.toDate ? record.date.toDate() : record.date, // Convert Firestore Timestamp to Date
+        }));
+        console.log('Fetched Duel History:', convertedHistory);
+        return convertedHistory;
       } else {
         console.warn(`No duel history found for user: ${userId}`);
         return [];

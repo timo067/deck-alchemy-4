@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CardService } from '../services/card.service';
 import { PlayerDeckService } from '../services/playerdeck.service';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core'; // Import ChangeDetectorRef
+import { DuelHistoryService } from '../services/duel-history.service'; // Import DuelHistoryService
 
 @Component({
   selector: 'app-game',
@@ -25,7 +26,9 @@ export class GamePage implements OnInit {
     private cardService: CardService,
     private playerDeckService: PlayerDeckService,
     private router: Router,
-    private cdr: ChangeDetectorRef // Inject ChangeDetectorRef
+    private cdr: ChangeDetectorRef, // Inject ChangeDetectorRef
+    private duelHistoryService: DuelHistoryService, // Inject DuelHistoryService
+
   ) {}
 
   ngOnInit() {
@@ -39,6 +42,15 @@ export class GamePage implements OnInit {
 
   this.initializeEnemyDeck();
   this.coinFlip();
+  this.loadDuelHistory(); // Load duel history on initialization
+
+  // Listen for navigation events to reload duel history
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd && event.url === '/game') {
+        console.log('Navigated back to GamePage. Reloading duel history...');
+        this.loadDuelHistory(); // Reload duel history when navigating back
+      }
+    });
 
   // Restore duel history from localStorage
   const savedHistory = localStorage.getItem('duelHistory');
@@ -68,6 +80,37 @@ export class GamePage implements OnInit {
 
      // Trigger change detection
       this.cdr.detectChanges();
+  }
+}
+    async loadDuelHistory() {
+    try {
+      this.duelHistory = await this.duelHistoryService.getDuelHistory(); // Fetch duel history for the user
+      console.log('Duel history loaded:', this.duelHistory);
+      this.cdr.detectChanges(); // Trigger change detection
+    } catch (error) {
+      console.error('Error loading duel history:', error);
+      alert('Failed to load duel history. Please ensure you are logged in.');
+    }
+  }
+
+  async saveDuelResult(duelResult: { result: string; date: Date }) {
+  try {
+    await this['duelHistoryService'].saveDuelResult(duelResult); // Save duel result for the user
+    console.log('Duel result saved:', duelResult);
+
+    // Update the local duel history array
+    this.duelHistory = [...this.duelHistory, duelResult];
+
+    // Keep only the last 5 duels
+    if (this.duelHistory.length > 5) {
+      this.duelHistory = this.duelHistory.slice(-5);
+    }
+
+    // Trigger change detection
+    this.cdr.detectChanges();
+  } catch (error) {
+    console.error('Error saving duel result:', error);
+    alert('Failed to save duel result.');
   }
 }
 
@@ -239,20 +282,20 @@ export class GamePage implements OnInit {
   }
 
   simulateDuel() {
-    if (this.playerDeck.cards.length < 40) {
-      alert('Player deck must have 40 cards.');
-      return
-    }
-    
-    // Navigate to the GameBoardPage
-    this.router.navigate(['/game-board'], {
-      state: {
-        playerDeck: this.playerDeck.cards, // Pass the player deck
-        enemyDeck: this.enemyDeck.cards,  // Pass the enemy deck
-        background: this.selectedBackground // Pass the selected background
-      }
-    });
+  if (this.playerDeck.cards.length < 40) {
+    alert('Player deck must have 40 cards.');
+    return;
   }
+
+  // Navigate to the GameBoardPage
+  this.router.navigate(['/game-board'], {
+    state: {
+      playerDeck: this.playerDeck.cards, // Pass the player deck
+      enemyDeck: this.enemyDeck.cards,  // Pass the enemy deck
+      background: this.selectedBackground // Pass the selected background
+    }
+  });
+}
 
   // Go to home page
   goHome(): void {
